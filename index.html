@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yama Supply Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --border: #2a2a35;
+    --accent: #e8c547;
+    --accent2: #ff6b4a;
+    --green: #4ade80;
+    --red: #f87171;
+    --text: #f0eff4;
+    --muted: #7c7c8e;
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,13,15,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .logo-dot {
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .admin-btn {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .admin-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* VIEWS */
+  .view { display: none; animation: fadeIn 0.3s ease; }
+  .view.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* STAFF VIEW */
+  .staff-hero {
+    padding: 3rem 2rem 1.5rem;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .step-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+
+  /* FORM CARD */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 760px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .form-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .form-section-title {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  /* RESTAURANT SELECTOR */
+  .restaurant-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 500px) {
+    .restaurant-grid { grid-template-columns: 1fr; }
+  }
+
+  .rest-btn {
+    padding: 0.85rem 1rem;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rest-btn .rest-initial {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+    transition: color 0.18s;
+  }
+
+  .rest-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .rest-btn:hover .rest-initial { color: var(--accent); }
+  .rest-btn.selected {
+    border-color: var(--accent);
+    background: rgba(232,197,71,0.08);
+  }
+  .rest-btn.selected .rest-initial { color: var(--accent); }
+
+  /* STAFF NAME */
+  .input-group {
+    margin-bottom: 1.5rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="text"], input[type="number"], input[type="password"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--muted); }
+
+  /* ITEMS TABLE */
+  .items-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    max-width: 760px;
+    margin: 0 auto 1.5rem;
+    overflow: hidden;
+  }
+
+  .items-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .items-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .search-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    outline: none;
+    width: 180px;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+
+  .item-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .item-row:last-child { border-bottom: none; }
+  .item-row:hover { background: rgba(255,255,255,0.02); }
+
+  .item-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+
+  .item-stock {
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .stock-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-left: 0.4rem;
+  }
+
+  .stock-ok { background: rgba(74,222,128,0.12); color: var(--green); }
+  .stock-low { background: rgba(248,113,113,0.12); color: var(--red); }
+  .stock-warn { background: rgba(232,197,71,0.12); color: var(--accent); }
+
+  .qty-control {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .qty-btn {
+    width: 28px; height: 28px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+
+  .qty-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .qty-display {
+    width: 40px;
+    text-align: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.25rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    outline: none;
+  }
+
+  /* SUBMIT */
+  .submit-area {
+    max-width: 760px;
+    margin: 0 auto 3rem;
+    padding: 0 0;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--accent);
+    color: #0d0d0f;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,197,71,0.3); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* SUCCESS TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--green);
+    color: #0d0d0f;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 100px;
+    z-index: 9999;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ADMIN VIEW */
+  .admin-header {
+    padding: 2.5rem 2rem 1.5rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .admin-title { font-family: var(--font-display); font-size: 2rem; font-weight: 800; }
+  .admin-sub { color: var(--muted); font-size: 0.78rem; margin-top: 0.3rem; }
+
+  .logout-btn {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    max-width: 1000px;
+    margin: 0 auto 2rem;
+    padding: 0 2rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+  }
+
+  .stat-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.4rem; }
+  .stat-value { font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; }
+  .stat-value.warn { color: var(--accent); }
+  .stat-value.danger { color: var(--red); }
+
+  /* ADMIN TABLE */
+  .admin-table-wrap {
+    max-width: 1000px;
+    margin: 0 auto 2rem;
+    padding: 0 2rem;
+  }
+
+  .admin-table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .admin-table-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .admin-table-title { font-family: var(--font-display); font-weight: 700; }
+
+  .restock-btn {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    background: rgba(232,197,71,0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .restock-btn:hover { background: rgba(232,197,71,0.2); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    text-align: left;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  td {
+    padding: 0.85rem 1.5rem;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(42,42,53,0.6);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  /* HISTORY LOG */
+  .log-wrap {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+    padding: 0 2rem;
+  }
+
+  .log-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .log-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+
+  .log-entry {
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid rgba(42,42,53,0.5);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.82rem;
+  }
+
+  .log-entry:last-child { border-bottom: none; }
+
+  .log-time { color: var(--muted); font-size: 0.72rem; white-space: nowrap; }
+  .log-detail { }
+  .log-detail strong { color: var(--accent); }
+  .log-restaurant {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+
+  /* LOGIN MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 360px;
+    max-width: 90vw;
+    animation: fadeIn 0.3s ease;
+    position: relative;
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 20px 20px 0 0;
+  }
+
+  .modal h2 { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; margin-bottom: 0.4rem; }
+  .modal p { color: var(--muted); font-size: 0.8rem; margin-bottom: 1.5rem; }
+
+  .modal-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--accent);
+    color: #0d0d0f;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.2s;
+  }
+  .modal-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,197,71,0.3); }
+
+  .error-msg { color: var(--red); font-size: 0.75rem; margin-top: 0.5rem; display: none; }
+  .error-msg.show { display: block; }
+
+  /* RESTOCK MODAL */
+  .restock-modal {
+    width: min(860px, 95vw);
+  }
+
+  .restock-item-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .restock-item-row:last-child { border-bottom: none; }
+
+  .restock-item-name { font-size: 0.85rem; }
+  .restock-item-name input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    outline: none;
+  }
+
+  .icon-btn {
+    width: 28px; height: 28px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn.delete:hover { border-color: var(--red); color: var(--red); }
+  .restock-qty-input {
+    width: 80px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-align: center;
+    outline: none;
+  }
+  .restock-qty-input:focus { border-color: var(--accent); }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .add-item-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .add-item-btn {
+    background: rgba(232,197,71,0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .add-item-btn:hover { background: rgba(232,197,71,0.2); }
+
+  .restock-scroll {
+    max-height: 55vh;
+    overflow-y: auto;
+    margin-bottom: 0.5rem;
+  }
+
+  .gs-setup-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .gs-setup-box a { color: var(--accent); text-decoration: none; }
+  .gs-setup-box strong { color: var(--text); }
+
+  .gs-config {
+    max-width: 1000px;
+    margin: 0 auto 2rem;
+    padding: 0 2rem;
+  }
+
+  .gs-config-card {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .gs-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+  .gs-dot.connected { background: var(--green); box-shadow: 0 0 8px rgba(74,222,128,0.5); }
+
+  .gs-status { font-size: 0.8rem; color: var(--muted); flex: 1; }
+  .gs-status strong { color: var(--text); }
+
+  .gs-connect-btn {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .gs-connect-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    max-width: 1000px;
+    margin: 0 auto 2rem;
+    padding: 0 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab-btn {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    background: none;
+    border: none;
+    padding: 0.85rem 1.2rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* COST STYLES */
+  .cost-tag { font-size: 0.72rem; color: var(--accent); font-weight: 500; }
+  .cost-input { width: 90px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0.6rem; color: var(--accent); font-family: var(--font-mono); font-size: 0.82rem; text-align: center; outline: none; }
+  .cost-input:focus { border-color: var(--accent); }
+  .restaurant-cost-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+  .restaurant-cost-name { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; }
+  .restaurant-cost-amount { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+  .period-btn { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.4rem 0.9rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+  .period-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .period-btn.active { background: rgba(232,197,71,0.1); border-color: var(--accent); color: var(--accent); }
+  .cost-summary-wrap { max-width: 1000px; margin: 0 auto 2rem; padding: 0 2rem; }
+  .submission-cost { font-size: 0.78rem; color: var(--accent); font-weight: 500; white-space: nowrap; }
+
+  /* STARTING STOCK */
+  .item-row.has-qty { background: rgba(232,197,71,0.03); border-left: 2px solid var(--accent); }
+  .item-row.mismatch { background: rgba(248,113,113,0.06); border-left: 2px solid var(--red); }
+  .starting-stock-wrap {
+    display: none;
+    margin-top: 0.6rem;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .item-row.has-qty .starting-stock-wrap { display: flex; }
+  .starting-stock-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+  .starting-stock-input {
+    width: 75px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 0.35rem 0.5rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .starting-stock-input:focus { border-color: var(--accent); }
+  .starting-stock-input.error { border-color: var(--red); background: rgba(248,113,113,0.08); color: var(--red); }
+  .starting-stock-input.ok { border-color: var(--green); }
+  .mismatch-msg { font-size: 0.7rem; color: var(--red); display: none; }
+  .item-row.mismatch .mismatch-msg { display: block; }
+
+  .empty-log {
+    padding: 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Yama Supply Hub
+  </div>
+  <div class="header-right">
+    <button class="admin-btn" onclick="openAdminLogin()">Admin Panel</button>
+  </div>
+</header>
+
+<!-- STAFF VIEW -->
+<div id="staffView" class="view active">
+  <div class="staff-hero">
+    <div class="step-label">Warehouse Request Form</div>
+    <h1>Take Items<br>from Storage</h1>
+    <p class="subtitle">Fill in the form below. Stock will update automatically.</p>
+  </div>
+
+  <!-- Step 1: Restaurant -->
+  <div class="form-card" style="max-width:760px;margin:0 auto 1.5rem;padding:1.75rem 2rem;">
+    <div class="form-section-title">Step 1 — Select Restaurant</div>
+    <div class="restaurant-grid">
+      <button class="rest-btn" onclick="selectRestaurant(this, 'Yama Cheyenne')">
+        <span class="rest-initial">YC</span>
+        Yama Cheyenne
+      </button>
+      <button class="rest-btn" onclick="selectRestaurant(this, 'Yama Spring Mountain')">
+        <span class="rest-initial">YS</span>
+        Yama Spring Mountain
+      </button>
+      <button class="rest-btn" onclick="selectRestaurant(this, 'Kimchi')">
+        <span class="rest-initial">KM</span>
+        Kimchi
+      </button>
+      <button class="rest-btn" onclick="selectRestaurant(this, 'Yama Flamingo')">
+        <span class="rest-initial">YF</span>
+        Yama Flamingo
+      </button>
+    </div>
+    <div class="form-section-title">Step 2 — Your Name</div>
+    <div class="input-group" style="margin-bottom:0">
+      <input type="text" id="staffName" placeholder="e.g. Maria Santos" />
+    </div>
+  </div>
+
+  <!-- Items -->
+  <div class="items-container">
+    <div class="items-header">
+      <span class="items-title">Step 3 — Select Items & Quantities</span>
+      <input class="search-input" type="text" placeholder="Search items..." oninput="filterItems(this.value)" />
+    </div>
+    <div id="itemsList"></div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-area" style="padding:0 0;max-width:760px;margin:0 auto 3rem;">
+    <button class="submit-btn" onclick="submitRequest()">Submit Request</button>
+  </div>
+</div>
+
+<!-- ADMIN VIEW -->
+<div id="adminView" class="view">
+  <div class="admin-header">
+    <div>
+      <div class="admin-title">Admin Panel</div>
+      <div class="admin-sub">Live inventory · <span id="lastUpdated">—</span></div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Log Out</button>
+  </div>
+
+  <!-- Google Sheets Config -->
+  <div class="gs-config">
+    <div class="gs-config-card">
+      <div class="gs-dot" id="gsDot"></div>
+      <div class="gs-status" id="gsStatus"><strong>Google Sheets not connected</strong> — data is stored locally for now. See setup guide below.</div>
+      <button class="gs-connect-btn" onclick="openGsSetup()">Setup Guide</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="statsRow"></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('inventory', this)">Inventory</button>
+    <button class="tab-btn" onclick="switchTab('history', this)">Activity Log</button>
+    <button class="tab-btn" onclick="switchTab('costs', this)">Cost Report</button>
+  </div>
+
+  <!-- Inventory Tab -->
+  <div id="tab-inventory" class="tab-content active">
+    <div class="admin-table-wrap">
+      <div class="admin-table-card">
+        <div class="admin-table-header">
+          <span class="admin-table-title">Current Stock Levels</span>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="restock-btn" onclick="openDeliveryModal()">🚚 New Delivery</button>
+            <button class="restock-btn" onclick="openRestockModal()">⚙ Manage Items</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Display Name</th>
+              <th>Invoice Name</th>
+              <th>Category</th>
+              <th>Stock</th>
+              <th>Batch Queue (FIFO)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Tab -->
+  <div id="tab-history" class="tab-content">
+    <div class="log-wrap">
+      <div class="log-card">
+        <div class="log-header" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Activity Log</span>
+          <button class="restock-btn" style="border-color:var(--red);color:var(--red);background:rgba(248,113,113,0.08)" onclick="clearAllLogs()">Clear All</button>
+        </div>
+        <div id="logEntries"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost Report Tab -->
+  <div id="tab-costs" class="tab-content">
+    <div class="cost-summary-wrap">
+
+      <!-- Period selector -->
+      <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <button class="period-btn active" onclick="setCostPeriod('week', this)">This Week</button>
+        <button class="period-btn" onclick="setCostPeriod('month', this)">This Month</button>
+        <button class="period-btn" onclick="setCostPeriod('all', this)">All Time</button>
+      </div>
+
+      <!-- Per Restaurant -->
+      <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Cost by Restaurant</div>
+      <div id="restaurantCosts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem;margin-bottom:2rem;"></div>
+
+      <!-- Per Item breakdown -->
+      <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Cost by Item</div>
+      <div class="admin-table-card" style="margin-bottom:2rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Cost/Box</th>
+              <th>Units Used</th>
+              <th>Total Cost</th>
+            </tr>
+          </thead>
+          <tbody id="itemCostBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
+    <h2>Admin Login</h2>
+    <p>Enter your manager password to access the admin panel.</p>
+    <div class="input-group" style="margin-bottom:0">
+      <label>Password</label>
+      <input type="password" id="adminPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter') checkLogin()" />
+      <div class="error-msg" id="loginError">Incorrect password. Try again.</div>
+    </div>
+    <button class="modal-btn" onclick="checkLogin()">Enter</button>
+  </div>
+</div>
+
+<!-- RESTOCK MODAL -->
+<div class="modal-overlay" id="restockModal">
+  <div class="modal restock-modal">
+    <button class="modal-close" onclick="closeModal('restockModal')">✕</button>
+    <h2>⚙ Manage Items</h2>
+    <p>Edit item names, invoice names, and manage each delivery batch individually.</p>
+    <div class="restock-scroll" id="restockList"></div>
+    <div class="add-item-row">
+      <input type="text" id="newItemName" placeholder="New item name (e.g. Chopsticks)" style="font-size:0.82rem;padding:0.5rem 0.75rem;" />
+      <button class="add-item-btn" onclick="addNewItem()">+ Add Item</button>
+    </div>
+    <button class="modal-btn" onclick="applyRestock()">Save Changes</button>
+  </div>
+</div>
+
+<!-- GS SETUP MODAL -->
+<div class="modal-overlay" id="gsModal">
+  <div class="modal" style="width:500px">
+    <button class="modal-close" onclick="closeModal('gsModal')">✕</button>
+    <h2>Google Sheets Setup</h2>
+    <p>Follow these steps to connect your Google Sheet as a live database.</p>
+    <div class="gs-setup-box">
+      <strong>Step 1.</strong> Create a new Google Sheet and name it <strong>"Yama Supply Hub"</strong>.<br><br>
+      <strong>Step 2.</strong> Go to <strong>Extensions → Apps Script</strong> and paste the provided script (ask your developer or contact us for the script).<br><br>
+      <strong>Step 3.</strong> Deploy the script as a <strong>Web App</strong> (access: Anyone). Copy the deployment URL.<br><br>
+      <strong>Step 4.</strong> Paste the URL below and click Connect.<br><br>
+      <input type="text" id="gsUrlInput" placeholder="https://script.google.com/macros/s/..." style="font-size:0.78rem;padding:0.5rem 0.75rem;" />
+      <button class="modal-btn" style="margin-top:0.75rem" onclick="connectGoogleSheets()">Connect Sheet</button>
+      <br><br>
+      <strong>Note:</strong> Until connected, all data is saved locally in your browser so nothing is lost.
+    </div>
+  </div>
+</div>
+
+<!-- NEW DELIVERY MODAL -->
+<div class="modal-overlay" id="deliveryModal">
+  <div class="modal" style="width:min(600px,95vw)">
+    <button class="modal-close" onclick="closeModal('deliveryModal')">✕</button>
+    <div style="font-size:1.5rem;margin-bottom:0.5rem">🚚</div>
+    <h2>New Delivery</h2>
+    <p>Add a new batch of stock. Each delivery is tracked separately for FIFO costing.</p>
+
+    <div class="input-group" style="margin-bottom:1rem">
+      <label>Select Item</label>
+      <select id="deliveryItem" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:0.75rem 1rem;color:var(--text);font-family:var(--font-mono);font-size:0.9rem;outline:none;">
+        <option value="">— Choose an item —</option>
+      </select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+      <div class="input-group" style="margin-bottom:0">
+        <label>Qty Received (boxes)</label>
+        <input type="number" id="deliveryQty" min="1" placeholder="e.g. 15" />
+      </div>
+      <div class="input-group" style="margin-bottom:0">
+        <label>Price per Box ($)</label>
+        <input type="number" id="deliveryPrice" min="0" step="0.01" placeholder="e.g. 25.00" />
+      </div>
+    </div>
+
+    <div class="input-group" style="margin-bottom:1rem">
+      <label>Delivery Date</label>
+      <input type="date" id="deliveryDate" />
+    </div>
+
+    <!-- Batch queue preview -->
+    <div id="batchPreview" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:0.8rem;">
+      <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem">Current Batch Queue (FIFO)</div>
+      <div id="batchList"></div>
+    </div>
+
+    <button class="modal-btn" onclick="addDelivery()">Add Delivery</button>
+  </div>
+</div>
+
+<!-- MISMATCH WARNING MODAL -->
+<div class="modal-overlay" id="mismatchModal">
+  <div class="modal" style="width:460px">
+    <div style="font-size:2rem;margin-bottom:0.75rem">⚠️</div>
+    <h2 style="color:var(--red)">Stock Count Mismatch</h2>
+    <p>Your request was submitted, but the following items had a count that didn't match the last recorded stock. An alert has been sent to the manager.</p>
+    <div id="mismatchList" style="margin:1rem 0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.75rem;font-size:0.82rem;line-height:1.8;"></div>
+    <p style="color:var(--red);font-size:0.82rem;font-weight:600;margin-bottom:0.5rem;">Please notify Milee or Nickel right away regarding this matter.</p>
+    <button class="modal-btn" style="background:var(--red)" onclick="closeModal('mismatchModal')">I Understand</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const ADMIN_PASSWORD = 'yama2024';
+const DISCORD_WEBHOOK = 'https://discordapp.com/api/webhooks/1481069343373656197/fDqeI6IzgN8wCmdhOVsB8c12dsgZ-QwI4enDKgfjI1PnVCJVqjvFQC6mf_Mp1W9w6xiM';
+const LOW_STOCK_THRESHOLD = 20;
+const WARN_STOCK_THRESHOLD = 50;
+
+const DEFAULT_ITEMS = [
+  { id: 1, name: 'Disposable Chopsticks', invoiceName: '', category: 'Utensils', stock: 200, cost: 0 },
+  { id: 2, name: 'Plastic Forks', invoiceName: '', category: 'Utensils', stock: 150, cost: 0 },
+  { id: 3, name: 'Plastic Spoons', invoiceName: '', category: 'Utensils', stock: 150, cost: 0 },
+  { id: 4, name: 'Plastic Knives', invoiceName: '', category: 'Utensils', stock: 120, cost: 0 },
+  { id: 5, name: 'Paper Napkins (pack)', invoiceName: '', category: 'Napkins', stock: 80, cost: 0 },
+  { id: 6, name: 'Cocktail Napkins (pack)', invoiceName: '', category: 'Napkins', stock: 60, cost: 0 },
+  { id: 7, name: 'To-Go Box Small', invoiceName: '', category: 'Packaging', stock: 100, cost: 0 },
+  { id: 8, name: 'To-Go Box Large', invoiceName: '', category: 'Packaging', stock: 100, cost: 0 },
+  { id: 9, name: 'To-Go Box XL', invoiceName: '', category: 'Packaging', stock: 75, cost: 0 },
+  { id: 10, name: 'Paper Bag Small', invoiceName: '', category: 'Packaging', stock: 90, cost: 0 },
+  { id: 11, name: 'Paper Bag Large', invoiceName: '', category: 'Packaging', stock: 90, cost: 0 },
+  { id: 12, name: 'Plastic Cup 12oz', invoiceName: '', category: 'Cups', stock: 200, cost: 0 },
+  { id: 13, name: 'Plastic Cup 16oz', invoiceName: '', category: 'Cups', stock: 200, cost: 0 },
+  { id: 14, name: 'Paper Cup (hot)', invoiceName: '', category: 'Cups', stock: 150, cost: 0 },
+  { id: 15, name: 'Straw (regular)', invoiceName: '', category: 'Accessories', stock: 300, cost: 0 },
+  { id: 16, name: 'Straw (boba)', invoiceName: '', category: 'Accessories', stock: 250, cost: 0 },
+  { id: 17, name: 'Soy Sauce Packet', invoiceName: '', category: 'Condiments', stock: 400, cost: 0 },
+  { id: 18, name: 'Plastic Gloves (box)', invoiceName: '', category: 'Supplies', stock: 30, cost: 0 },
+  { id: 19, name: 'Trash Bags (roll)', invoiceName: '', category: 'Supplies', stock: 25, cost: 0 },
+  { id: 20, name: 'Hand Soap Refill', invoiceName: '', category: 'Supplies', stock: 15, cost: 0 },
+];
+
+let state = {
+  items: [],
+  batches: JSON.parse(localStorage.getItem('yama_batches') || '{}'), // { itemId: [{qty, price, date, remaining}] }
+  log: JSON.parse(localStorage.getItem('yama_log') || '[]'),
+  gsUrl: 'https://script.google.com/macros/s/AKfycbwk6Xe95esCye1vOwN7HzHKLF44smsEXzHoSUnHDWGSqp4_uOs897ydtnwYGFnMjvuD/exec',
+  nextId: parseInt(localStorage.getItem('yama_nextId') || '21'),
+};
+
+function save() {
+  localStorage.setItem('yama_log', JSON.stringify(state.log));
+  localStorage.setItem('yama_nextId', state.nextId);
+  localStorage.setItem('yama_batches', JSON.stringify(state.batches));
+  syncInventoryToSheets();
+}
+
+async function fetchInventoryFromSheets() {
+  const container = document.getElementById('itemsList');
+  container.innerHTML = `<div class="empty-log" style="padding:2rem;text-align:center;color:var(--muted)">Loading inventory...</div>`;
+  try {
+    const res = await fetch(state.gsUrl + '?type=inventory');
+    const data = await res.json();
+    if (data && data.length > 0) {
+      state.items = data;
+      state.nextId = Math.max(...data.map(i => i.id), 20) + 1;
+      // Do NOT sync back — just read
+    } else {
+      // Only push defaults if sheet is truly empty
+      state.items = DEFAULT_ITEMS;
+      syncInventoryToSheets();
+    }
+  } catch (e) {
+    state.items = DEFAULT_ITEMS;
+    console.warn('Could not fetch inventory from Sheets, using defaults:', e);
+  }
+  renderItemsList();
+}
+
+async function syncInventoryToSheets() {
+  try {
+    await fetch(state.gsUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'inventory', items: state.items })
+    });
+  } catch (e) {
+    console.warn('Inventory sync failed:', e);
+  }
+}
+
+// ============================================================
+// STAFF VIEW
+// ============================================================
+let selectedRestaurant = '';
+let quantities = {};
+
+function selectRestaurant(btn, name) {
+  document.querySelectorAll('.rest-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedRestaurant = name;
+}
+
+function filterItems(query) {
+  renderItemsList(query.toLowerCase());
+}
+
+function renderItemsList(filter = '') {
+  const container = document.getElementById('itemsList');
+  const filtered = state.items.filter(i => i.name.toLowerCase().includes(filter));
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-log">No items found.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(item => {
+    const qty = quantities[item.id] || 0;
+    const hasQty = qty > 0;
+    return `
+      <div class="item-row ${hasQty ? 'has-qty' : ''}" id="itemrow-${item.id}">
+        <div style="flex:1">
+          <div class="item-name">${item.name}</div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:2px">${item.category}</div>
+          <div class="starting-stock-wrap">
+            <span class="starting-stock-label">Count stock physically →</span>
+            <input class="starting-stock-input" type="number" min="0"
+              id="startstock-${item.id}"
+              placeholder="Enter count"
+              oninput="verifyStartingStock(${item.id})" />
+          </div>
+        </div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+          <input class="qty-display" type="number" min="0" value="${qty}" id="qty-${item.id}"
+            onchange="setQty(${item.id}, this.value)" />
+          <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function changeQty(id, delta) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  const current = quantities[id] || 0;
+  const newVal = Math.max(0, Math.min(item.stock, current + delta));
+  quantities[id] = newVal;
+  const input = document.getElementById(`qty-${id}`);
+  if (input) input.value = newVal;
+  updateItemRowState(id);
+}
+
+function setQty(id, val) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  quantities[id] = Math.max(0, Math.min(item.stock, parseInt(val) || 0));
+  updateItemRowState(id);
+}
+
+function updateItemRowState(id) {
+  const row = document.getElementById(`itemrow-${id}`);
+  if (!row) return;
+  const qty = quantities[id] || 0;
+  if (qty > 0) {
+    row.classList.add('has-qty');
+  } else {
+    row.classList.remove('has-qty', 'mismatch');
+    const ss = document.getElementById(`startstock-${id}`);
+    if (ss) { ss.value = ''; ss.classList.remove('error', 'ok'); }
+  }
+  verifyStartingStock(id);
+}
+
+function verifyStartingStock(id) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  const input = document.getElementById(`startstock-${id}`);
+  if (!input) return;
+  // Just remove error state as they type — no live feedback
+  input.classList.remove('error');
+  const row = document.getElementById(`itemrow-${id}`);
+  if (row) row.classList.remove('mismatch');
+}
+
+function submitRequest() {
+  if (!selectedRestaurant) { showToast('Please select a restaurant!', true); return; }
+  const staffName = document.getElementById('staffName').value.trim();
+  if (!staffName) { showToast('Please enter your name!', true); return; }
+
+  const taken = Object.entries(quantities).filter(([id, qty]) => qty > 0);
+  if (taken.length === 0) { showToast('Please select at least one item!', true); return; }
+
+  // Check starting stock - collect mismatches but don't block
+  const mismatches = [];
+  let unfilledCount = 0;
+  taken.forEach(([id]) => {
+    const item = state.items.find(i => i.id === parseInt(id));
+    if (!item) return;
+    const input = document.getElementById(`startstock-${id}`);
+    const entered = input ? input.value.trim() : '';
+    if (entered === '') {
+      unfilledCount++;
+      if (input) input.classList.add('error');
+    } else if (parseInt(entered) !== parseInt(item.stock)) {
+      mismatches.push({
+        name: item.name,
+        entered: parseInt(entered),
+        actual: parseInt(item.stock)
+      });
+    }
+  });
+
+  if (unfilledCount > 0) {
+    showToast(`Please count & fill starting stock for all items!`, true);
+    return;
+  }
+
+  // Deduct stock and calculate FIFO cost
+  const itemsWithCost = taken.map(([id, qty]) => {
+    const item = state.items.find(i => i.id === parseInt(id));
+    if (item) item.stock = Math.max(0, item.stock - qty);
+    const { totalCost, breakdown } = calculateFIFOCost(parseInt(id), qty);
+    return {
+      name: item?.name || '?',
+      qty,
+      cost: item?.cost || 0,
+      total: totalCost,
+      fifoBreakdown: breakdown
+    };
+  });
+
+  // Sync updated inventory to Sheets
+  syncInventoryToSheets();
+
+  // Log
+  const logEntry = {
+    id: Date.now(),
+    time: new Date().toISOString(),
+    restaurant: selectedRestaurant,
+    staff: staffName,
+    items: itemsWithCost,
+    totalCost: itemsWithCost.reduce((sum, i) => sum + i.total, 0)
+  };
+  state.log.unshift(logEntry);
+  save();
+
+  // Send to Google Sheets if configured
+  if (state.gsUrl) sendToGoogleSheets(logEntry);
+
+  // Send to Discord
+  sendToDiscord(logEntry);
+
+  // Handle mismatches — show popup + send Discord warning
+  if (mismatches.length > 0) {
+    document.getElementById('mismatchList').innerHTML = mismatches.map(m =>
+      `<div>• <strong>${m.name}</strong> — count doesn't match the last recorded stock</div>`
+    ).join('');
+    openModal('mismatchModal');
+    sendMismatchAlert(staffName, selectedRestaurant, mismatches);
+  }
+
+  // Reset
+  quantities = {};
+  document.getElementById('staffName').value = '';
+  document.querySelectorAll('.rest-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.starting-stock-input').forEach(i => { i.value = ''; i.classList.remove('error','ok'); });
+  selectedRestaurant = '';
+  renderItemsList();
+
+  showToast(`✓ Request submitted for ${logEntry.restaurant}`);
+}
+
+// ============================================================
+// ADMIN VIEW
+// ============================================================
+let isAdmin = false;
+
+function openAdminLogin() {
+  if (isAdmin) { switchToAdmin(); return; }
+  openModal('loginModal');
+  setTimeout(() => document.getElementById('adminPassword').focus(), 100);
+}
+
+function checkLogin() {
+  const pw = document.getElementById('adminPassword').value;
+  if (pw === ADMIN_PASSWORD) {
+    closeModal('loginModal');
+    document.getElementById('adminPassword').value = '';
+    document.getElementById('loginError').classList.remove('show');
+    isAdmin = true;
+    switchToAdmin();
+  } else {
+    document.getElementById('loginError').classList.add('show');
+  }
+}
+
+function logout() {
+  isAdmin = false;
+  document.getElementById('staffView').classList.add('active');
+  document.getElementById('adminView').classList.remove('active');
+}
+
+function switchToAdmin() {
+  document.getElementById('staffView').classList.remove('active');
+  document.getElementById('adminView').classList.add('active');
+  renderAdminTable();
+  renderStats();
+  fetchLogFromSheets();
+  updateLastUpdated();
+  if (state.gsUrl) {
+    document.getElementById('gsDot').classList.add('connected');
+    document.getElementById('gsStatus').innerHTML = `<strong>Google Sheets connected</strong> — data syncs on every submission.`;
+  }
+}
+
+function renderStats() {
+  const total = state.items.length;
+  const lowItems = state.items.filter(i => i.stock <= LOW_STOCK_THRESHOLD).length;
+  const warnItems = state.items.filter(i => i.stock <= WARN_STOCK_THRESHOLD && i.stock > LOW_STOCK_THRESHOLD).length;
+  const todayLogs = state.log.filter(l => new Date(l.time).toDateString() === new Date().toDateString()).length;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total Items</div>
+      <div class="stat-value">${total}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Low Stock ⚠</div>
+      <div class="stat-value ${lowItems > 0 ? 'danger' : ''}">${lowItems}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Watch Items</div>
+      <div class="stat-value ${warnItems > 0 ? 'warn' : ''}">${warnItems}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Requests Today</div>
+      <div class="stat-value">${todayLogs}</div>
+    </div>
+  `;
+}
+
+function renderAdminTable() {
+  const sorted = [...state.items].sort((a, b) => a.stock - b.stock);
+  const maxStock = Math.max(...state.items.map(i => i.stock), 1);
+
+  document.getElementById('adminTableBody').innerHTML = sorted.map(item => {
+    const pct = Math.round((item.stock / maxStock) * 100);
+    const statusClass = item.stock <= LOW_STOCK_THRESHOLD ? 'stock-low' : item.stock <= WARN_STOCK_THRESHOLD ? 'stock-warn' : 'stock-ok';
+    const statusLabel = item.stock <= LOW_STOCK_THRESHOLD ? '⚠ Low' : item.stock <= WARN_STOCK_THRESHOLD ? '~ Watch' : '✓ OK';
+    const barColor = item.stock <= LOW_STOCK_THRESHOLD ? 'var(--red)' : item.stock <= WARN_STOCK_THRESHOLD ? 'var(--accent)' : 'var(--green)';
+    const batches = state.batches[item.id] || [];
+
+    return `
+      <tr>
+        <td style="font-weight:500">${item.name}</td>
+        <td style="color:var(--muted);font-size:0.8rem">${item.invoiceName || '<span style="color:var(--border)">—</span>'}</td>
+        <td style="color:var(--muted)">${item.category}</td>
+        <td>
+          <strong>${item.stock}</strong>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%;background:${barColor}"></div>
+          </div>
+        </td>
+        <td>
+          ${batches.length > 0
+            ? batches.map((b,i) => `<div style="font-size:0.75rem;color:${i===0?'var(--accent)':'var(--muted)'}">
+                ${i===0?'▶ ':''}$${parseFloat(b.price).toFixed(2)} × ${b.remaining} boxes
+              </div>`).join('')
+            : `<span style="color:var(--muted)">—</span>`}
+        </td>
+        <td><span class="stock-badge ${statusClass}">${statusLabel}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function fetchLogFromSheets() {
+  const container = document.getElementById('logEntries');
+  container.innerHTML = `<div class="empty-log">Loading log from Google Sheets...</div>`;
+
+  try {
+    const res = await fetch(state.gsUrl);
+    const data = await res.json();
+
+    if (!data || data.length === 0) {
+      container.innerHTML = `<div class="empty-log">No activity yet. Submissions will appear here.</div>`;
+      return;
+    }
+
+    container.innerHTML = data.map((entry, index) => {
+      const d = new Date(entry.time);
+      const timeStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+        d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="log-entry" id="logentry-${index}">
+          <div class="log-time">${timeStr}</div>
+          <div class="log-detail"><strong>${entry.staff}</strong> took: ${entry.items}</div>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <div class="log-restaurant">${entry.restaurant}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (e) {
+    // Fallback to local log if sheets fetch fails
+    renderLog();
+    console.warn('Could not fetch from Sheets, showing local log:', e);
+  }
+}
+
+
+function renderLog() {
+  const container = document.getElementById('logEntries');
+  if (state.log.length === 0) {
+    container.innerHTML = `<div class="empty-log">No activity yet. Submissions will appear here.</div>`;
+    return;
+  }
+  container.innerHTML = state.log.slice(0, 50).map(entry => {
+    const d = new Date(entry.time);
+    const timeStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+      d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const itemSummary = entry.items.map(i => `<strong>${i.qty}×</strong> ${i.name}`).join(', ');
+    const totalCost = entry.totalCost || entry.items.reduce((s, i) => s + (i.total || 0), 0);
+    const costLabel = totalCost > 0 ? `<span class="submission-cost">$${totalCost.toFixed(2)}</span>` : '';
+    return `
+      <div class="log-entry" id="logentry-${entry.id}">
+        <div class="log-time">${timeStr}</div>
+        <div class="log-detail"><strong>${entry.staff}</strong> took: ${itemSummary} ${costLabel}</div>
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <div class="log-restaurant">${entry.restaurant}</div>
+          <button class="icon-btn delete" title="Remove this entry & restore stock" onclick="deleteLogEntry(${entry.id})" style="flex-shrink:0">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function clearAllLogs() {
+  if (!confirm('Clear ALL activity log entries? This will NOT restore stock.')) return;
+  state.log = [];
+  save();
+  renderLog();
+  renderStats();
+  showToast('✓ Activity log cleared');
+}
+
+function deleteLogEntry(id) {
+  const entry = state.log.find(l => l.id === id);
+  if (!entry) return;
+  if (!confirm(`Remove this entry by "${entry.staff}" and restore the stock back?`)) return;
+
+  // Restore stock for each item in the entry
+  entry.items.forEach(taken => {
+    const item = state.items.find(i => i.name === taken.name);
+    if (item) item.stock += taken.qty;
+  });
+
+  state.log = state.log.filter(l => l.id !== id);
+  save();
+  renderLog();
+  renderAdminTable();
+  renderStats();
+  showToast('✓ Entry removed & stock restored');
+}
+
+function updateLastUpdated() {
+  document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'costs') renderCostReport();
+  if (name === 'history') fetchLogFromSheets();
+}
+
+// ============================================================
+// MANAGE ITEMS / BATCH MANAGER MODAL
+// ============================================================
+function openRestockModal() {
+  renderManageList();
+  openModal('restockModal');
+}
+
+function renderManageList() {
+  const list = document.getElementById('restockList');
+  list.innerHTML = state.items.map(item => {
+    const batches = state.batches[item.id] || [];
+    const batchRows = batches.length > 0
+      ? batches.map((b, bi) => `
+        <div style="display:grid;grid-template-columns:1fr 120px 120px auto;gap:0.5rem;align-items:center;padding:0.4rem 0.75rem;background:var(--surface2);border-radius:6px;margin-bottom:0.35rem;">
+          <div style="font-size:0.78rem;color:var(--muted)">
+            <span style="color:${bi===0?'var(--accent)':'var(--text)'}">📦 Batch ${bi+1}</span>
+            <span style="margin-left:0.5rem;font-size:0.7rem">${b.date}</span>
+          </div>
+          <input type="number" min="0" value="${b.remaining}"
+            onchange="updateBatchQty(${item.id}, ${bi}, this.value)"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.3rem 0.5rem;color:var(--text);font-size:0.8rem;width:100%;text-align:center"
+            title="Remaining qty" placeholder="qty" />
+          <input type="number" min="0" step="0.01" value="${b.price}"
+            onchange="updateBatchPrice(${item.id}, ${bi}, this.value)"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.3rem 0.5rem;color:var(--accent);font-size:0.8rem;width:100%;text-align:center"
+            title="Price per box" placeholder="$price" />
+          <button onclick="deleteBatch(${item.id}, ${bi})" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:5px;padding:0.3rem 0.5rem;cursor:pointer;font-size:0.75rem;" title="Remove batch">✕</button>
+        </div>
+      `).join('')
+      : `<div style="font-size:0.75rem;color:var(--muted);padding:0.4rem 0.75rem;font-style:italic">No batches yet — use 🚚 New Delivery to add stock</div>`;
+
+    return `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;">
+        <!-- Item Header -->
+        <div style="display:grid;grid-template-columns:1fr auto auto;gap:0.5rem;align-items:start;margin-bottom:0.75rem;">
+          <div>
+            <div style="font-weight:600;font-size:0.95rem;margin-bottom:4px" id="nameCell-${item.id}">${item.name}</div>
+            <input type="text" placeholder="Invoice name (e.g. SKBD Plastic Black Spoon 250 Pcs)"
+              data-invoice-id="${item.id}"
+              value="${item.invoiceName || ''}"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:0.3rem 0.6rem;color:var(--muted);font-size:0.75rem;outline:none;" />
+            <div style="font-size:0.7rem;color:var(--muted);margin-top:3px">Total stock: <strong style="color:var(--text)">${item.stock}</strong></div>
+          </div>
+          <button class="icon-btn" onclick="toggleRename(${item.id})" title="Rename display name">✎ Rename</button>
+          <button class="icon-btn delete" onclick="deleteItem(${item.id})" title="Delete item">✕</button>
+        </div>
+
+        <!-- Batch Header -->
+        <div style="display:grid;grid-template-columns:1fr 120px 120px auto;gap:0.5rem;padding:0 0.75rem;margin-bottom:0.3rem;">
+          <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Batch</div>
+          <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);text-align:center">Remaining Qty</div>
+          <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);text-align:center">Price/Box</div>
+          <div></div>
+        </div>
+
+        <!-- Batch Rows -->
+        <div id="batchRows-${item.id}">${batchRows}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateBatchQty(itemId, batchIndex, value) {
+  const batches = state.batches[itemId];
+  if (!batches || !batches[batchIndex]) return;
+  const oldQty = batches[batchIndex].remaining;
+  const newQty = parseInt(value) || 0;
+  batches[batchIndex].remaining = newQty;
+  // Update total stock accordingly
+  const item = state.items.find(i => i.id === itemId);
+  if (item) item.stock = item.stock - oldQty + newQty;
+}
+
+function updateBatchPrice(itemId, batchIndex, value) {
+  const batches = state.batches[itemId];
+  if (!batches || !batches[batchIndex]) return;
+  batches[batchIndex].price = parseFloat(value) || 0;
+}
+
+function deleteBatch(itemId, batchIndex) {
+  const batches = state.batches[itemId];
+  if (!batches) return;
+  if (!confirm(`Remove this batch? Stock will be reduced accordingly.`)) return;
+  const removed = batches[batchIndex].remaining;
+  batches.splice(batchIndex, 1);
+  state.batches[itemId] = batches;
+  const item = state.items.find(i => i.id === itemId);
+  if (item) item.stock = Math.max(0, item.stock - removed);
+  save();
+  renderAdminTable();
+  renderManageList();
+  showToast('✓ Batch removed');
+}
+
+function applyRestock() {
+  // Save invoice names
+  document.querySelectorAll('[data-invoice-id]').forEach(input => {
+    const id = parseInt(input.dataset.invoiceId);
+    const item = state.items.find(i => i.id === id);
+    if (item) item.invoiceName = input.value.trim();
+  });
+  save();
+  renderAdminTable();
+  renderStats();
+  closeModal('restockModal');
+  showToast('✓ Changes saved');
+}
+
+function toggleRename(id) {
+  const cell = document.getElementById(`nameCell-${id}`);
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  cell.innerHTML = `<input type="text" value="${item.name}"
+    onblur="saveRename(${id}, this)"
+    onkeydown="if(event.key==='Enter') saveRename(${id}, this)"
+    style="font-weight:600;font-size:0.95rem;background:var(--surface2);border:1px solid var(--accent);border-radius:5px;padding:0.2rem 0.4rem;color:var(--text);width:100%"
+    autofocus />`;
+  cell.querySelector('input').focus();
+}
+
+function saveRename(id, input) {
+  const newName = input.value.trim();
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  if (newName) { item.name = newName; save(); renderItemsList(); }
+  const cell = document.getElementById(`nameCell-${id}`);
+  if (cell) cell.innerHTML = `<div style="font-weight:600;font-size:0.95rem">${item.name}</div>`;
+}
+
+function deleteItem(id) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  if (!confirm(`Delete "${item.name}"? This cannot be undone.`)) return;
+  state.items = state.items.filter(i => i.id !== id);
+  delete state.batches[id];
+  save();
+  renderItemsList();
+  renderManageList();
+  showToast(`"${item.name}" deleted`);
+}
+
+function addNewItem() {
+  const nameInput = document.getElementById('newItemName');
+  const name = nameInput.value.trim();
+  if (!name) return;
+  const newItem = { id: state.nextId++, name, invoiceName: '', category: 'General', stock: 0, cost: 0 };
+  state.items.push(newItem);
+  save();
+  nameInput.value = '';
+  renderManageList();
+  showToast(`✓ "${name}" added`);
+}
+
+// ============================================================
+// COST REPORT
+// ============================================================
+let costPeriod = 'week';
+
+function setCostPeriod(period, btn) {
+  costPeriod = period;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCostReport();
+}
+
+function getFilteredLog(period) {
+  const now = Date.now();
+  return state.log.filter(entry => {
+    const t = new Date(entry.time).getTime();
+    if (period === 'week') return t > now - 7 * 24 * 3600 * 1000;
+    if (period === 'month') return t > now - 30 * 24 * 3600 * 1000;
+    return true;
+  });
+}
+
+function renderCostReport() {
+  const logs = getFilteredLog(costPeriod);
+  const restaurants = ['Yama Cheyenne', 'Yama Spring Mountain', 'Kimchi', 'Yama Flamingo'];
+
+  // Cost per restaurant
+  const restCosts = {};
+  restaurants.forEach(r => restCosts[r] = 0);
+  logs.forEach(entry => {
+    const cost = entry.totalCost || entry.items.reduce((s, i) => s + (i.total || 0), 0);
+    if (restCosts[entry.restaurant] !== undefined) restCosts[entry.restaurant] += cost;
+  });
+
+  document.getElementById('restaurantCosts').innerHTML = restaurants.map(r => `
+    <div class="restaurant-cost-card">
+      <div class="restaurant-cost-name">${r}</div>
+      <div class="restaurant-cost-amount">$${restCosts[r].toFixed(2)}</div>
+    </div>
+  `).join('');
+
+  // Cost per item
+  const itemCosts = {};
+  logs.forEach(entry => {
+    entry.items.forEach(i => {
+      if (!itemCosts[i.name]) itemCosts[i.name] = { qty: 0, total: 0, cost: i.cost || 0 };
+      itemCosts[i.name].qty += i.qty;
+      itemCosts[i.name].total += i.total || 0;
+    });
+  });
+
+  const sorted = Object.entries(itemCosts).sort((a, b) => b[1].total - a[1].total);
+
+  if (sorted.length === 0) {
+    document.getElementById('itemCostBody').innerHTML = `<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--muted)">No data for this period.</td></tr>`;
+    return;
+  }
+
+  document.getElementById('itemCostBody').innerHTML = sorted.map(([name, data]) => {
+    const itemCostPerBox = state.items.find(i => i.name === name)?.cost || data.cost || 0;
+    return `
+      <tr>
+        <td style="font-weight:500">${name}</td>
+        <td style="color:var(--accent)">${itemCostPerBox > 0 ? '$' + itemCostPerBox.toFixed(2) : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="color:var(--muted)">${data.qty}</td>
+        <td style="color:var(--accent);font-weight:600">${data.total > 0 ? '$' + data.total.toFixed(2) : '<span style="color:var(--muted)">—</span>'}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+
+function openGsSetup() { openModal('gsModal'); }
+
+function connectGoogleSheets() {
+  const url = document.getElementById('gsUrlInput').value.trim();
+  if (!url.startsWith('https://')) { showToast('Enter a valid URL', true); return; }
+  state.gsUrl = url;
+  save();
+  document.getElementById('gsDot').classList.add('connected');
+  document.getElementById('gsStatus').innerHTML = `<strong>Google Sheets connected</strong> — data syncs on every submission.`;
+  closeModal('gsModal');
+  showToast('✓ Google Sheets connected!');
+}
+
+async function sendMismatchAlert(staff, restaurant, mismatches) {
+  const mismatchList = mismatches.map(m =>
+    `> ⚠ **${m.name}** — counted **${m.entered}**, system has **${m.actual}**`
+  ).join('\n');
+
+  const now = new Date();
+  const timeStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' at ' +
+    now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+  const mentions = '<@536508015075917824> <@243790481501323274> <@1391215530886828177> <@1416896032855298118>';
+
+  const payload = {
+    content: mentions,
+    username: 'Yama Supply Hub',
+    avatar_url: 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png',
+    embeds: [{
+      color: 0xff6b4a,
+      title: '🚨 Stock Count Mismatch Detected',
+      description: 'A submission was made with a starting stock count that does not match the system. Please investigate.',
+      fields: [
+        { name: '🏪 Restaurant', value: restaurant, inline: true },
+        { name: '👤 Staff', value: staff, inline: true },
+        { name: '🗓️ Time', value: timeStr, inline: false },
+        { name: '⚠ Mismatched Items', value: mismatchList, inline: false },
+      ],
+      footer: { text: 'Yama Supply Hub — Stock Verification Alert' }
+    }]
+  };
+
+  try {
+    await fetch(DISCORD_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    console.warn('Discord mismatch alert failed:', e);
+  }
+}
+
+async function sendToDiscord(logEntry) {
+  const itemList = logEntry.items.map(i => {
+    const lineCost = i.total > 0 ? ` — $${i.total.toFixed(2)}` : '';
+    return `> **${i.qty}×** ${i.name}${lineCost}`;
+  }).join('\n');
+  const now = new Date(logEntry.time);
+  const timeStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' at ' +
+    now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const totalCost = logEntry.totalCost || 0;
+
+  const payload = {
+    username: 'Yama Supply Hub',
+    avatar_url: 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png',
+    embeds: [{
+      color: 0xe8c547,
+      title: '📦 New Inventory Request',
+      fields: [
+        { name: '🏪 Restaurant', value: logEntry.restaurant, inline: true },
+        { name: '👤 Staff', value: logEntry.staff, inline: true },
+        { name: '🗓️ Date & Time', value: timeStr, inline: false },
+        { name: '📋 Items Taken', value: itemList, inline: false },
+        ...(totalCost > 0 ? [{ name: '💰 Total Supply Cost', value: `$${totalCost.toFixed(2)}`, inline: false }] : []),
+      ],
+      footer: { text: `Yama Supply Hub • ${timeStr}` }
+    }]
+  };
+
+  try {
+    await fetch(DISCORD_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    console.warn('Discord notification failed:', e);
+  }
+}
+
+// ============================================================
+// FIFO BATCH SYSTEM
+// ============================================================
+
+function openDeliveryModal() {
+  const select = document.getElementById('deliveryItem');
+  select.innerHTML = '<option value="">— Choose an item —</option>' +
+    state.items.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+  document.getElementById('deliveryDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('deliveryQty').value = '';
+  document.getElementById('deliveryPrice').value = '';
+  document.getElementById('batchPreview').style.display = 'none';
+  select.onchange = () => showBatchPreview(parseInt(select.value));
+  openModal('deliveryModal');
+}
+
+function showBatchPreview(itemId) {
+  const preview = document.getElementById('batchPreview');
+  const batchList = document.getElementById('batchList');
+  const batches = state.batches[itemId] || [];
+  if (batches.length === 0) { preview.style.display = 'none'; return; }
+  preview.style.display = 'block';
+  batchList.innerHTML = batches.map((b, i) => `
+    <div style="display:flex;justify-content:space-between;padding:0.3rem 0;border-bottom:1px solid var(--border);color:${i === 0 ? 'var(--accent)' : 'var(--muted)'}">
+      <span>${i === 0 ? '▶ ' : ''}${b.date} — ${b.remaining} boxes remaining</span>
+      <span>$${parseFloat(b.price).toFixed(2)}/box</span>
+    </div>
+  `).join('');
+}
+
+function addDelivery() {
+  const itemId = parseInt(document.getElementById('deliveryItem').value);
+  const qty = parseInt(document.getElementById('deliveryQty').value);
+  const price = parseFloat(document.getElementById('deliveryPrice').value);
+  const date = document.getElementById('deliveryDate').value;
+
+  if (!itemId) { showToast('Please select an item!', true); return; }
+  if (!qty || qty <= 0) { showToast('Please enter a valid quantity!', true); return; }
+  if (!price || price <= 0) { showToast('Please enter a valid price!', true); return; }
+  if (!date) { showToast('Please enter a delivery date!', true); return; }
+
+  if (!state.batches[itemId]) state.batches[itemId] = [];
+  state.batches[itemId].push({ qty, remaining: qty, price, date });
+
+  const item = state.items.find(i => i.id === itemId);
+  if (item) { item.stock += qty; item.cost = price; }
+
+  save();
+  renderAdminTable();
+  renderStats();
+  showBatchPreview(itemId);
+  syncBatchToSheets(item?.name || '', qty, price, date);
+  showToast(`✓ Delivery added — ${qty} boxes @ $${price.toFixed(2)}/box`);
+}
+
+function calculateFIFOCost(itemId, qtyTaken) {
+  const batches = state.batches[itemId];
+  if (!batches || batches.length === 0) {
+    const item = state.items.find(i => i.id === itemId);
+    return { totalCost: (item?.cost || 0) * qtyTaken, breakdown: [] };
+  }
+  let remaining = qtyTaken;
+  let totalCost = 0;
+  const breakdown = [];
+  for (let i = 0; i < batches.length && remaining > 0; i++) {
+    const batch = batches[i];
+    const used = Math.min(batch.remaining, remaining);
+    totalCost += used * batch.price;
+    breakdown.push({ qty: used, price: batch.price, date: batch.date });
+    batch.remaining -= used;
+    remaining -= used;
+  }
+  state.batches[itemId] = batches.filter(b => b.remaining > 0);
+  return { totalCost, breakdown };
+}
+
+async function syncBatchToSheets(itemName, qty, price, date) {
+  try {
+    await fetch(state.gsUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'batch', itemName, qty, price, date })
+    });
+  } catch(e) { console.warn('Batch sync failed:', e); }
+}
+
+async function sendToGoogleSheets(logEntry) {
+  if (!state.gsUrl) return;
+  try {
+    await fetch(state.gsUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        timestamp: logEntry.time,
+        restaurant: logEntry.restaurant,
+        staff: logEntry.staff,
+        items: logEntry.items.map(i => `${i.qty}x ${i.name}`).join(', '),
+        totalCost: logEntry.totalCost > 0 ? `$${logEntry.totalCost.toFixed(2)}` : ''
+      })
+    });
+  } catch (e) {
+    console.warn('GS sync failed:', e);
+  }
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+let toastTimer;
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = isError ? 'var(--red)' : 'var(--green)';
+  t.style.color = '#0d0d0f';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('show');
+  });
+});
+
+// ============================================================
+// INIT
+// ============================================================
+fetchInventoryFromSheets();
+</script>
+</body>
+</html>
