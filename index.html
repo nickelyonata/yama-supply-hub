@@ -912,6 +912,10 @@
         <span class="rest-initial">YF</span>
         Yama Flamingo
       </button>
+      <button class="rest-btn" onclick="selectRestaurant(this, 'Yama Fremont')">
+        <span class="rest-initial">YFR</span>
+        Yama Fremont
+      </button>
     </div>
     <div class="form-section-title">Step 2 — Your Name</div>
     <div class="input-group" style="margin-bottom:0">
@@ -1646,7 +1650,21 @@ function renderManageList() {
           <button onclick="deleteBatch(${item.id}, ${bi})" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:5px;padding:0.3rem 0.5rem;cursor:pointer;font-size:0.75rem;" title="Remove batch">✕</button>
         </div>
       `).join('')
-      : `<div style="font-size:0.75rem;color:var(--muted);padding:0.4rem 0.75rem;font-style:italic">No batches yet — use 🚚 New Delivery to add stock</div>`;
+      : `
+        <div style="background:var(--surface2);border:1px dashed var(--accent);border-radius:8px;padding:0.75rem;margin-bottom:0.35rem;">
+          <div style="font-size:0.75rem;color:var(--accent);margin-bottom:0.5rem;">📦 Set opening stock & price</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:0.5rem;align-items:center;">
+            <input type="number" min="0" placeholder="Current qty in stock"
+              id="openQty-${item.id}"
+              style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.3rem 0.5rem;color:var(--text);font-size:0.8rem;width:100%;text-align:center" />
+            <input type="number" min="0" step="0.01" placeholder="$price per box"
+              id="openPrice-${item.id}"
+              style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.3rem 0.5rem;color:var(--accent);font-size:0.8rem;width:100%;text-align:center" />
+            <button onclick="setOpeningStock(${item.id})"
+              style="background:var(--accent);color:#000;border:none;border-radius:5px;padding:0.3rem 0.75rem;cursor:pointer;font-size:0.78rem;font-weight:600;white-space:nowrap;">✓ Set</button>
+          </div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:0.4rem">Leave price empty if unknown — you can update it later via 🚚 New Delivery</div>
+        </div>`;
 
     return `
       <div style="border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;">
@@ -1679,7 +1697,28 @@ function renderManageList() {
   }).join('');
 }
 
-function updateBatchQty(itemId, batchIndex, value) {
+function setOpeningStock(itemId) {
+  const qtyInput = document.getElementById(`openQty-${itemId}`);
+  const priceInput = document.getElementById(`openPrice-${itemId}`);
+  const qty = parseInt(qtyInput?.value) || 0;
+  const price = parseFloat(priceInput?.value) || 0;
+
+  if (qty <= 0) { showToast('Please enter a valid qty!', true); return; }
+
+  const today = new Date().toISOString().split('T')[0];
+  if (!state.batches[itemId]) state.batches[itemId] = [];
+  state.batches[itemId].push({ qty, remaining: qty, price, date: today });
+
+  const item = state.items.find(i => i.id === itemId);
+  if (item) { item.stock = qty; item.cost = price; }
+
+  save();
+  renderAdminTable();
+  renderManageList();
+  showToast(`✓ Opening stock set for ${item?.name}`);
+}
+
+
   const batches = state.batches[itemId];
   if (!batches || !batches[batchIndex]) return;
   const oldQty = batches[batchIndex].remaining;
