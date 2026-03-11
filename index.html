@@ -1718,7 +1718,7 @@ function setOpeningStock(itemId) {
   showToast(`✓ Opening stock set for ${item?.name}`);
 }
 
-
+function updateBatchQty(itemId, batchIndex, value) {
   const batches = state.batches[itemId];
   if (!batches || !batches[batchIndex]) return;
   const oldQty = batches[batchIndex].remaining;
