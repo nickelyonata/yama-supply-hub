@@ -391,90 +391,41 @@
     </div>
 
 
-    <!-- ══ SECTION B: W-4 2026 EMBEDDED ══ -->
+    <!-- ══ SECTION B: W-4 ══ -->
     <div class="section-card" id="section-1">
       <div class="section-header">
         <div class="section-icon">📋</div>
         <div>
           <div class="section-title" id="title-B">B. W-4 — Employee's Withholding Certificate</div>
-          <div class="section-subtitle" id="sub-B">2026 · Fill out all fields and sign below</div>
+          <div class="section-subtitle" id="sub-B">Download, complete, sign, then upload below</div>
         </div>
       </div>
       <div class="section-body">
-        <div class="info-note"><span>ℹ️</span><div id="w4-note">This is the 2026 W-4. Complete all steps that apply to you and sign. Your data goes directly and securely to HR.</div></div>
+        <div class="info-note"><span>ℹ️</span><div id="w4-note">The W-4 tells your employer how much federal tax to withhold from your paycheck. Download the official 2026 form below, fill it out, sign it, then upload the completed copy.</div></div>
 
-        <div class="embedded-form-wrap">
-          <div class="embedded-form-title">Form W-4 (2026) &nbsp;—&nbsp; Employee's Withholding Certificate</div>
-          <div class="embedded-form-agency">Department of the Treasury &nbsp;·&nbsp; Internal Revenue Service</div>
+        <div class="pdf-card">
+          <div class="pdf-icon">📄</div>
+          <div class="pdf-info">
+            <strong id="w4-pdf-title">IRS Form W-4 (2026)</strong>
+            <span id="w4-pdf-sub">Employee's Withholding Certificate — irs.gov</span>
+          </div>
+          <a class="btn-pdf" href="https://www.irs.gov/pub/irs-pdf/fw4.pdf" target="_blank" id="btn-w4-download">Download PDF</a>
+        </div>
 
-          <div class="w4-step-header"><span class="w4-step-num">Step 1</span><span id="w4-step1-label">Personal Information</span></div>
-          <div class="field-row cols-3">
-            <div class="field"><label id="w4-lbl-first">First Name &amp; Middle Initial <span class="req">*</span></label><input type="text" id="w4-first" placeholder="First name M.I." /></div>
-            <div class="field"><label id="w4-lbl-last">Last Name <span class="req">*</span></label><input type="text" id="w4-last" placeholder="Last name" /></div>
-            <div class="field"><label id="w4-lbl-ssn">Social Security Number <span class="req">*</span></label><input type="text" id="w4-ssn" placeholder="XXX-XX-XXXX" maxlength="11" /></div>
-          </div>
-          <div class="field-row">
-            <div class="field"><label id="w4-lbl-addr">Home Address <span class="req">*</span></label><input type="text" id="w4-addr" placeholder="Street address" /></div>
-          </div>
-          <div class="field-row cols-3">
-            <div class="field"><label id="w4-lbl-city2">City <span class="req">*</span></label><input type="text" id="w4-city" placeholder="City" /></div>
-            <div class="field"><label id="w4-lbl-state2">State <span class="req">*</span></label><input type="text" id="w4-state-txt" placeholder="NV" maxlength="2" /></div>
-            <div class="field"><label id="w4-lbl-zip2">ZIP <span class="req">*</span></label><input type="text" id="w4-zip" placeholder="89101" maxlength="10" /></div>
-          </div>
-          <div class="field" style="margin-top:1rem">
-            <label id="w4-lbl-filing">Filing Status <span class="req">*</span></label>
-            <div class="radio-group" style="flex-direction:column;gap:0.5rem">
-              <label class="radio-opt"><input type="radio" name="w4-filing" value="single" /><span id="w4-filing-single">Single or Married filing separately</span></label>
-              <label class="radio-opt"><input type="radio" name="w4-filing" value="married" /><span id="w4-filing-married">Married filing jointly or Qualifying surviving spouse</span></label>
-              <label class="radio-opt"><input type="radio" name="w4-filing" value="hoh" /><span id="w4-filing-hoh">Head of household</span></label>
+        <div class="info-note" style="margin-top:0.5rem"><span>💡</span><div id="w4-tip">Most employees just fill out Step 1 (your name &amp; address), check your filing status, then sign Step 5. Steps 2–4 are optional unless you have multiple jobs or dependents.</div></div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label id="lbl-w4-upload">Upload Your Completed &amp; Signed W-4 <span class="req">*</span></label>
+          <div class="upload-zone">
+            <input type="file" id="w4-file" accept="image/*,.pdf" onchange="previewFile(this,'w4-name')" />
+            <div class="upload-icon">📤</div>
+            <div class="upload-text">
+              <strong id="upload-w4-label">Upload signed W-4</strong>
+              <span id="upload-w4-sub">PDF or photo of signed form</span>
             </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="w4-step-header"><span class="w4-step-num">Step 2</span><span id="w4-step2-label">Multiple Jobs or Spouse Works</span></div>
-          <div class="info-note" style="margin-bottom:0.8rem"><span>ℹ️</span><div id="w4-step2-note">Complete this step only if you hold more than one job at a time, or are married filing jointly and your spouse also works.</div></div>
-          <label class="radio-opt" style="width:fit-content;cursor:pointer"><input type="checkbox" id="w4-multijob" /><span id="w4-multijob-label">&nbsp;Check here if this applies to you</span></label>
-
-          <div class="divider"></div>
-
-          <div class="w4-step-header"><span class="w4-step-num">Step 3</span><span id="w4-step3-label">Claim Dependents</span></div>
-          <div class="info-note" style="margin-bottom:0.8rem"><span>ℹ️</span><div id="w4-step3-note">If your total income will be $200,000 or less ($400,000 or less if married filing jointly), complete the fields below.</div></div>
-          <div class="field-row cols-2">
-            <div class="field"><label id="w4-lbl-dep-children">Qualifying children under 17 × $2,000</label><input type="text" id="w4-dep-children" placeholder="$0.00" oninput="calcW4Total()" /></div>
-            <div class="field"><label id="w4-lbl-dep-other">Other dependents × $500</label><input type="text" id="w4-dep-other" placeholder="$0.00" oninput="calcW4Total()" /></div>
-          </div>
-          <div class="field-row cols-2">
-            <div class="field"><label id="w4-lbl-dep-total">Total</label><input type="text" id="w4-dep-total" placeholder="$0.00" readonly style="background:#f0ece6;cursor:default" /></div>
-            <div></div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="w4-step-header"><span class="w4-step-num">Step 4</span><span id="w4-step4-label">Other Adjustments <em style="font-weight:300;font-style:italic">(optional)</em></span></div>
-          <div class="field-row cols-3">
-            <div class="field"><label id="w4-lbl-other-income">Other income (not from jobs)</label><input type="text" id="w4-other-income" placeholder="$0.00" /></div>
-            <div class="field"><label id="w4-lbl-deductions">Deductions</label><input type="text" id="w4-deductions" placeholder="$0.00" /></div>
-            <div class="field"><label id="w4-lbl-extra-wh">Extra withholding per pay period</label><input type="text" id="w4-extra-wh" placeholder="$0.00" /></div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="w4-step-header"><span class="w4-step-num">Step 5</span><span id="w4-step5-label">Sign Here</span></div>
-          <div class="info-note" style="margin-bottom:0.8rem"><span>⚠️</span><div id="w4-sign-note">Under penalties of perjury, I declare that this certificate is true, correct, and complete.</div></div>
-          <div class="field-row cols-2">
-            <div class="field">
-              <label id="w4-lbl-sig">Signature <span class="req">*</span></label>
-              <div class="sig-wrap">
-                <div class="sig-label-overlay" id="sig-overlay-W4">Sign here with your mouse or finger</div>
-                <canvas class="sig-canvas" id="sigCanvas-W4" style="height:110px"></canvas>
-              </div>
-              <div class="sig-actions"><button class="btn-clear-sig" onclick="clearSig('W4')" id="btn-clear-W4">Clear</button></div>
-            </div>
-            <div class="field">
-              <label id="w4-lbl-date">Date</label>
-              <div class="date-display" style="margin-top:0.35rem">📅 <span id="w4-date"></span></div>
-            </div>
+            <div class="file-preview" id="w4-name"></div>
           </div>
         </div>
 
@@ -485,86 +436,41 @@
       </div>
     </div>
 
-    <!-- ══ SECTION C: I-9 EMBEDDED ══ -->
+    <!-- ══ SECTION C: I-9 ══ -->
     <div class="section-card" id="section-2">
       <div class="section-header">
         <div class="section-icon">🇺🇸</div>
         <div>
           <div class="section-title" id="title-C">C. I-9 — Employment Eligibility Verification</div>
-          <div class="section-subtitle" id="sub-C">Section 1 — Employee fills this out on or before first day of work</div>
+          <div class="section-subtitle" id="sub-C">Download, complete Section 1, sign, then upload below</div>
         </div>
       </div>
       <div class="section-body">
-        <div class="info-note"><span>ℹ️</span><div id="i9-note">Complete Section 1 accurately. Your employer will complete Section 2 after reviewing your identity documents.</div></div>
+        <div class="info-note"><span>ℹ️</span><div id="i9-note">The I-9 confirms you are legally authorized to work in the United States. Download the official USCIS form, fill out Section 1 only, sign it, then upload below. Your employer will complete Section 2.</div></div>
 
-        <div class="embedded-form-wrap">
-          <div class="embedded-form-title">Form I-9 — Employment Eligibility Verification</div>
-          <div class="embedded-form-agency">Department of Homeland Security &nbsp;·&nbsp; U.S. Citizenship and Immigration Services</div>
-          <div style="font-size:0.78rem;color:var(--text-light);margin-bottom:1.2rem;font-style:italic">Section 1 — Employee Information and Attestation</div>
+        <div class="pdf-card">
+          <div class="pdf-icon">📄</div>
+          <div class="pdf-info">
+            <strong id="i9-pdf-title">USCIS Form I-9 (2023 edition)</strong>
+            <span id="i9-pdf-sub">Employment Eligibility Verification — uscis.gov</span>
+          </div>
+          <a class="btn-pdf" href="https://www.uscis.gov/sites/default/files/document/forms/i-9.pdf" target="_blank" id="btn-i9-download">Download PDF</a>
+        </div>
 
-          <div class="field-row cols-3">
-            <div class="field"><label id="i9-lbl-last">Last Name <span class="req">*</span></label><input type="text" id="i9-last" placeholder="Family name" /></div>
-            <div class="field"><label id="i9-lbl-first">First Name <span class="req">*</span></label><input type="text" id="i9-first" placeholder="Given name" /></div>
-            <div class="field"><label id="i9-lbl-mi">Middle Initial</label><input type="text" id="i9-mi" placeholder="M.I." maxlength="1" /></div>
-          </div>
-          <div class="field-row cols-2">
-            <div class="field"><label id="i9-lbl-other-names">Other Last Names Used (if any)</label><input type="text" id="i9-other-names" placeholder="N/A if none" /></div>
-            <div class="field"><label id="i9-lbl-dob">Date of Birth <span class="req">*</span></label><input type="date" id="i9-dob" /></div>
-          </div>
-          <div class="field-row">
-            <div class="field"><label id="i9-lbl-addr">Address (Street Number and Name) <span class="req">*</span></label><input type="text" id="i9-addr" placeholder="Street address" /></div>
-          </div>
-          <div class="field-row cols-3">
-            <div class="field"><label id="i9-lbl-apt">Apt Number</label><input type="text" id="i9-apt" placeholder="Apt / Unit" /></div>
-            <div class="field"><label id="i9-lbl-city3">City or Town <span class="req">*</span></label><input type="text" id="i9-city" placeholder="City" /></div>
-            <div class="field"><label id="i9-lbl-state3">State <span class="req">*</span></label><input type="text" id="i9-state" placeholder="NV" maxlength="2" /></div>
-          </div>
-          <div class="field-row cols-2">
-            <div class="field"><label id="i9-lbl-zip3">ZIP Code <span class="req">*</span></label><input type="text" id="i9-zip" placeholder="89101" maxlength="10" /></div>
-            <div class="field"><label id="i9-lbl-ssn">U.S. Social Security Number <span class="req">*</span></label><input type="text" id="i9-ssn" placeholder="XXX-XX-XXXX" maxlength="11" /></div>
-          </div>
-          <div class="field-row cols-2">
-            <div class="field"><label id="i9-lbl-email">Email Address</label><input type="email" id="i9-email" placeholder="employee@email.com" /></div>
-            <div class="field"><label id="i9-lbl-phone2">Telephone Number</label><input type="tel" id="i9-phone" placeholder="(702) 555-0000" /></div>
-          </div>
+        <div class="info-note" style="margin-top:0.5rem"><span>💡</span><div id="i9-tip">You only need to fill out Section 1 — your name, address, date of birth, SSN, and check your citizenship status box. Sign and date at the bottom of Section 1.</div></div>
 
-          <div class="divider"></div>
+        <div class="divider"></div>
 
-          <!-- Citizenship Attestation -->
-          <div style="font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-light);margin-bottom:0.8rem" id="i9-attest-lbl">Citizenship / Immigration Status <span class="req">*</span></div>
-          <div class="radio-group" style="flex-direction:column;gap:0.6rem">
-            <label class="radio-opt"><input type="radio" name="i9-citizenship" value="citizen" /><span id="i9-cit-1">A citizen of the United States</span></label>
-            <label class="radio-opt"><input type="radio" name="i9-citizenship" value="noncitizen_national" /><span id="i9-cit-2">A noncitizen national of the United States</span></label>
-            <label class="radio-opt"><input type="radio" name="i9-citizenship" value="lpr" /><span id="i9-cit-3">A lawful permanent resident</span></label>
-            <label class="radio-opt"><input type="radio" name="i9-citizenship" value="alien" /><span id="i9-cit-4">An alien authorized to work</span></label>
-          </div>
-
-          <!-- Alien work auth expiry (shown only if alien selected) -->
-          <div id="i9-alien-fields" style="display:none;margin-top:0.8rem">
-            <div class="field-row cols-2">
-              <div class="field"><label id="i9-lbl-alien-exp">Work Authorization Expiration Date</label><input type="date" id="i9-alien-exp" /></div>
-              <div class="field"><label id="i9-lbl-uscis">USCIS A-Number / Form I-94 / Foreign Passport Number</label><input type="text" id="i9-uscis" placeholder="Number" /></div>
+        <div class="field">
+          <label id="lbl-i9-upload">Upload Your Completed &amp; Signed I-9 <span class="req">*</span></label>
+          <div class="upload-zone">
+            <input type="file" id="i9-file" accept="image/*,.pdf" onchange="previewFile(this,'i9-name')" />
+            <div class="upload-icon">📤</div>
+            <div class="upload-text">
+              <strong id="upload-i9-label">Upload signed I-9</strong>
+              <span id="upload-i9-sub">PDF or photo of signed form</span>
             </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- Signature -->
-          <div style="font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-light);margin-bottom:0.5rem" id="i9-sig-section-lbl">Signature of Employee</div>
-          <div class="info-note" style="margin-bottom:0.8rem"><span>⚠️</span><div id="i9-sign-note">I attest, under penalty of perjury, that I am aware of the federal laws that provide criminal penalties for the unauthorized use of the documents listed in this form and that the information I have provided is true and correct.</div></div>
-          <div class="field-row cols-2">
-            <div class="field">
-              <label id="i9-lbl-sig">Signature <span class="req">*</span></label>
-              <div class="sig-wrap">
-                <div class="sig-label-overlay" id="sig-overlay-I9">Sign here with your mouse or finger</div>
-                <canvas class="sig-canvas" id="sigCanvas-I9" style="height:110px"></canvas>
-              </div>
-              <div class="sig-actions"><button class="btn-clear-sig" onclick="clearSig('I9')" id="btn-clear-I9">Clear</button></div>
-            </div>
-            <div class="field">
-              <label id="i9-lbl-date">Today's Date</label>
-              <div class="date-display" style="margin-top:0.35rem">📅 <span id="i9-date"></span></div>
-            </div>
+            <div class="file-preview" id="i9-name"></div>
           </div>
         </div>
 
@@ -789,10 +695,8 @@ const T = {
 let lang = 'en';
 let currentStep = 0;
 const sigs = {
-  A:   { canvas: null, ctx: null, drawing: false, hasData: false },
-  D:   { canvas: null, ctx: null, drawing: false, hasData: false },
-  W4:  { canvas: null, ctx: null, drawing: false, hasData: false },
-  I9:  { canvas: null, ctx: null, drawing: false, hasData: false }
+  A: { canvas: null, ctx: null, drawing: false, hasData: false },
+  D: { canvas: null, ctx: null, drawing: false, hasData: false }
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -943,6 +847,9 @@ function goToStep(step) {
   });
   document.getElementById('section-'+step).classList.add('active');
   currentStep = step;
+  // Init the signature pad for this step AFTER the section is visible
+  const sigId = STEP_SIGS[step];
+  if (sigId) setTimeout(() => initOneSig(sigId), 50);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -968,28 +875,16 @@ function validateStep(step) {
     if (!ok) { alert(t.alertRequired); return false; }
   }
   if (step === 1) {
-    const w4req = ['w4-first','w4-last','w4-ssn','w4-addr','w4-city','w4-state-txt','w4-zip'];
-    let ok = true;
-    w4req.forEach(id => {
-      const el = document.getElementById(id);
-      if (!el || !el.value.trim()) { if(el) el.classList.add('invalid'); ok = false; }
-      else el.classList.remove('invalid');
-    });
-    if (!document.querySelector('input[name="w4-filing"]:checked')) { alert(t.alertRequired); return false; }
-    if (!sigs.W4.hasData) { alert(t.alertSig); return false; }
-    if (!ok) { alert(t.alertRequired); return false; }
+    if (!document.getElementById('w4-file').files.length) {
+      alert('Please upload your completed and signed W-4 before continuing.');
+      return false;
+    }
   }
   if (step === 2) {
-    const i9req = ['i9-last','i9-first','i9-dob','i9-addr','i9-city','i9-state','i9-zip','i9-ssn'];
-    let ok = true;
-    i9req.forEach(id => {
-      const el = document.getElementById(id);
-      if (!el || !el.value.trim()) { if(el) el.classList.add('invalid'); ok = false; }
-      else el.classList.remove('invalid');
-    });
-    if (!document.querySelector('input[name="i9-citizenship"]:checked')) { alert(t.alertRequired); return false; }
-    if (!sigs.I9.hasData) { alert(t.alertSig); return false; }
-    if (!ok) { alert(t.alertRequired); return false; }
+    if (!document.getElementById('i9-file').files.length) {
+      alert('Please upload your completed and signed I-9 before continuing.');
+      return false;
+    }
   }
   return true;
 }
@@ -1048,9 +943,6 @@ async function submitForm() {
     const food = document.querySelector('input[name="foodcard"]:checked');
     const tam  = document.querySelector('input[name="tamcard"]:checked');
 
-    const w4filing = document.querySelector('input[name="w4-filing"]:checked');
-    const i9cit    = document.querySelector('input[name="i9-citizenship"]:checked');
-
     const payload = {
       language:      lang,
       firstName:     document.getElementById('fname').value.trim(),
@@ -1066,49 +958,23 @@ async function submitForm() {
       positionOther: document.getElementById('position-other').value.trim(),
       foodCard:      food ? food.value : 'no',
       tamCard:       tam  ? tam.value  : 'no',
-      w4: {
-        firstName:      document.getElementById('w4-first').value.trim(),
-        lastName:       document.getElementById('w4-last').value.trim(),
-        ssn:            document.getElementById('w4-ssn').value.trim(),
-        address:        document.getElementById('w4-addr').value.trim(),
-        city:           document.getElementById('w4-city').value.trim(),
-        state:          document.getElementById('w4-state-txt').value.trim(),
-        zip:            document.getElementById('w4-zip').value.trim(),
-        filingStatus:   w4filing ? w4filing.value : '',
-        multipleJobs:   document.getElementById('w4-multijob').checked,
-        depChildren:    document.getElementById('w4-dep-children').value.trim(),
-        depOther:       document.getElementById('w4-dep-other').value.trim(),
-        depTotal:       document.getElementById('w4-dep-total').value.trim(),
-        otherIncome:    document.getElementById('w4-other-income').value.trim(),
-        deductions:     document.getElementById('w4-deductions').value.trim(),
-        extraWithhold:  document.getElementById('w4-extra-wh').value.trim(),
-      },
-      i9: {
-        lastName:       document.getElementById('i9-last').value.trim(),
-        firstName:      document.getElementById('i9-first').value.trim(),
-        middleInitial:  document.getElementById('i9-mi').value.trim(),
-        otherNames:     document.getElementById('i9-other-names').value.trim(),
-        dob:            document.getElementById('i9-dob').value,
-        address:        document.getElementById('i9-addr').value.trim(),
-        apt:            document.getElementById('i9-apt').value.trim(),
-        city:           document.getElementById('i9-city').value.trim(),
-        state:          document.getElementById('i9-state').value.trim(),
-        zip:            document.getElementById('i9-zip').value.trim(),
-        ssn:            document.getElementById('i9-ssn').value.trim(),
-        email:          document.getElementById('i9-email').value.trim(),
-        phone:          document.getElementById('i9-phone').value.trim(),
-        citizenshipStatus: i9cit ? i9cit.value : '',
-        alienExpiry:    document.getElementById('i9-alien-exp') ? document.getElementById('i9-alien-exp').value : '',
-        uscisNumber:    document.getElementById('i9-uscis') ? document.getElementById('i9-uscis').value.trim() : '',
-      },
       files,
     };
 
     const resp = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify(payload),
+      redirect: 'follow',
     });
-    const result = await resp.json();
+    const text = await resp.text();
+    let result;
+    try {
+      // Strip any HTML wrapper Google sometimes adds
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      result = jsonMatch ? JSON.parse(jsonMatch[0]) : { success: false, error: 'Bad response: ' + text.substring(0, 200) };
+    } catch(parseErr) {
+      result = { success: false, error: 'Parse error: ' + text.substring(0, 200) };
+    }
 
     if (result.success) {
       // Hide overlay and show success
@@ -1143,23 +1009,30 @@ async function submitForm() {
 // ══════════════════════════════════════════════════════════════
 //  SIGNATURE PAD
 // ══════════════════════════════════════════════════════════════
-function initSignatures() {
-  ['A','D','W4','I9'].forEach(id => {
-    const canvas = document.getElementById('sigCanvas-'+id);
-    const ctx = canvas.getContext('2d');
-    sigs[id].canvas = canvas; sigs[id].ctx = ctx;
-    resizeCanvas(id);
-    ctx.strokeStyle = '#2e1f10'; ctx.lineWidth = 2.2;
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+// Map step index → which signature pad lives on that step
+const STEP_SIGS = { 0: 'A', 3: 'D' };
 
-    canvas.addEventListener('mousedown', e => startDraw(e,id,'mouse'));
-    canvas.addEventListener('mousemove', e => draw(e,id,'mouse'));
-    canvas.addEventListener('mouseup', () => stopDraw(id));
-    canvas.addEventListener('mouseleave', () => stopDraw(id));
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e,id,'touch'); }, {passive:false});
-    canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e,id,'touch'); }, {passive:false});
-    canvas.addEventListener('touchend', () => stopDraw(id));
-  });
+function initSignatures() {
+  initOneSig('A');
+}
+
+function initOneSig(id) {
+  if (sigs[id].canvas) return; // already done
+  const canvas = document.getElementById('sigCanvas-'+id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  sigs[id].canvas = canvas; sigs[id].ctx = ctx;
+  resizeCanvas(id);
+  ctx.strokeStyle = '#2e1f10'; ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+  canvas.addEventListener('mousedown', e => startDraw(e,id,'mouse'));
+  canvas.addEventListener('mousemove', e => draw(e,id,'mouse'));
+  canvas.addEventListener('mouseup', () => stopDraw(id));
+  canvas.addEventListener('mouseleave', () => stopDraw(id));
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e,id,'touch'); }, {passive:false});
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e,id,'touch'); }, {passive:false});
+  canvas.addEventListener('touchend', () => stopDraw(id));
 }
 
 function resizeCanvas(id) {
