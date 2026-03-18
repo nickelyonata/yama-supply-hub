@@ -1154,8 +1154,8 @@
 // ============================================================
 const ADMIN_PASSWORD = 'yama2024';
 const DISCORD_WEBHOOK = 'https://discordapp.com/api/webhooks/1481069343373656197/fDqeI6IzgN8wCmdhOVsB8c12dsgZ-QwI4enDKgfjI1PnVCJVqjvFQC6mf_Mp1W9w6xiM';
-const LOW_STOCK_THRESHOLD = 20;
-const WARN_STOCK_THRESHOLD = 50;
+const LOW_STOCK_THRESHOLD = 5;
+const WARN_STOCK_THRESHOLD = 10;
 
 const DEFAULT_ITEMS = [
   { id: 1, name: 'Disposable Chopsticks', invoiceName: '', category: 'Utensils', stock: 200, cost: 0 },
@@ -1184,7 +1184,7 @@ let state = {
   items: [],
   batches: JSON.parse(localStorage.getItem('yama_batches') || '{}'), // { itemId: [{qty, price, date, remaining}] }
   log: JSON.parse(localStorage.getItem('yama_log') || '[]'),
-  gsUrl: 'https://script.google.com/macros/s/AKfycbwk6Xe95esCye1vOwN7HzHKLF44smsEXzHoSUnHDWGSqp4_uOs897ydtnwYGFnMjvuD/exec',
+  gsUrl: 'https://script.google.com/macros/s/AKfycbylwwGoURzmteGdMspkjHYMOVQ8rZi5CGdHhp7jRmxbRvo4NRpwm1-nQmps8qc7EYzw/exec',
   nextId: parseInt(localStorage.getItem('yama_nextId') || '21'),
 };
 
