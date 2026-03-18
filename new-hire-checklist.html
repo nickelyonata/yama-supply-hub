@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Hire Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  /* ── PASTE YOUR APPS SCRIPT URL BELOW IN THE SCRIPT SECTION ── */
+
+  :root {
+    --cream: #fdf6ee;
+    --warm-brown: #5c3d2e;
+    --gold: #c8973a;
+    --gold-light: #e8b95a;
+    --rust: #a0522d;
+    --sage: #7a8c6e;
+    --text: #2e1f10;
+    --text-light: #6b4c35;
+    --border: #d9c4aa;
+    --white: #ffffff;
+    --error: #c0392b;
+    --success: #27ae60;
+    --shadow: 0 4px 24px rgba(92,61,46,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── LANGUAGE SCREEN ── */
+  #lang-screen {
+    position: fixed; inset: 0; z-index: 1000;
+    background: linear-gradient(145deg, #3b2012 0%, #5c3d2e 50%, #7a4f30 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2rem; padding: 2rem;
+  }
+  .lang-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem; font-weight: 700;
+    color: var(--gold-light); text-align: center; letter-spacing: 1px;
+  }
+  .lang-logo span { display: block; font-size: 1rem; font-weight: 300; color: #d4b89a; letter-spacing: 4px; text-transform: uppercase; margin-top: 4px; }
+  .lang-subtitle { color: #c4a882; font-size: 1rem; text-align: center; font-weight: 300; letter-spacing: 1px; }
+  .lang-buttons { display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 320px; }
+  .lang-btn {
+    padding: 1.1rem 2rem; border: 2px solid var(--gold);
+    background: transparent; color: var(--gold-light);
+    font-family: 'Lato', sans-serif; font-size: 1.1rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    border-radius: 4px; cursor: pointer; transition: all 0.25s ease;
+  }
+  .lang-btn:hover { background: var(--gold); color: #3b2012; transform: translateY(-2px); }
+  .lang-divider { width: 60px; height: 2px; background: var(--gold); opacity: 0.4; }
+
+  /* ── APP ── */
+  #app { display: none; }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, #3b2012 0%, #5c3d2e 100%);
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .header-brand { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold-light); font-weight: 700; }
+  .header-brand span { display: block; font-size: 0.7rem; color: #c4a882; letter-spacing: 3px; text-transform: uppercase; font-family: 'Lato', sans-serif; font-weight: 300; }
+  .header-sub { color: #c4a882; font-size: 0.85rem; text-align: right; }
+
+  /* ── PROGRESS ── */
+  .progress-wrap { background: #3b2012; padding: 0.8rem 2rem; border-bottom: 1px solid rgba(200,151,58,0.3); }
+  .progress-steps { display: flex; gap: 0; max-width: 900px; margin: 0 auto; }
+  .step-pill {
+    flex: 1; text-align: center; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: #7a5c3e; padding: 0.4rem 0.2rem;
+    cursor: pointer; position: relative; transition: color 0.2s;
+  }
+  .step-pill.active { color: var(--gold-light); }
+  .step-pill.done { color: var(--sage); }
+  .step-pill::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 3px; background: #7a5c3e; border-radius: 2px; transition: background 0.2s; }
+  .step-pill.active::after { background: var(--gold); }
+  .step-pill.done::after { background: var(--sage); }
+
+  /* ── MAIN ── */
+  main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+  /* ── SECTION CARDS ── */
+  .section-card {
+    display: none; background: var(--white);
+    border-radius: 12px; box-shadow: var(--shadow);
+    border: 1px solid var(--border); overflow: hidden;
+    margin-bottom: 2rem; animation: fadeIn 0.35s ease;
+  }
+  .section-card.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header {
+    background: linear-gradient(135deg, #5c3d2e, #7a4f30);
+    padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1rem;
+  }
+  .section-icon { width: 46px; height: 46px; border-radius: 50%; background: rgba(200,151,58,0.2); border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--gold-light); font-weight: 600; }
+  .section-subtitle { font-size: 0.82rem; color: #c4a882; margin-top: 2px; font-weight: 300; }
+  .section-body { padding: 2rem; }
+
+  /* ── FIELDS ── */
+  .field-row { display: grid; gap: 1.2rem; margin-bottom: 1.2rem; }
+  .field-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .field-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .field label { font-size: 0.78rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); }
+  .field label .req { color: var(--rust); margin-left: 2px; }
+  .field input, .field select, .field textarea {
+    padding: 0.7rem 0.9rem; border: 1.5px solid var(--border); border-radius: 6px;
+    font-family: 'Lato', sans-serif; font-size: 0.95rem; color: var(--text);
+    background: #fdfaf6; transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,151,58,0.15); }
+  .field input.invalid { border-color: var(--error); }
+  .field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c8973a' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 2rem; }
+
+  /* ── RADIO / POSITION ── */
+  .radio-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .radio-opt { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem; border: 1.5px solid var(--border); border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 0.92rem; color: var(--text-light); }
+  .radio-opt:has(input:checked) { border-color: var(--gold); background: #fef9f0; color: var(--warm-brown); font-weight: 700; }
+  .radio-opt input { accent-color: var(--gold); }
+
+  .position-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 0.7rem; }
+  .pos-opt { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.8rem; border: 1.5px solid var(--border); border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
+  .pos-opt:has(input:checked) { border-color: var(--gold); background: #fef9f0; font-weight: 700; }
+  .pos-opt input { accent-color: var(--gold); }
+
+  /* ── FILE UPLOAD ── */
+  .upload-zone { border: 2px dashed var(--border); border-radius: 8px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; background: #fdfaf6; position: relative; }
+  .upload-zone:hover { border-color: var(--gold); background: #fef9f0; }
+  .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .upload-text { font-size: 0.85rem; color: var(--text-light); }
+  .upload-text strong { color: var(--gold); display: block; font-size: 0.9rem; }
+  .file-preview { margin-top: 0.8rem; font-size: 0.82rem; color: var(--sage); font-weight: 700; }
+
+  /* ── SIGNATURE PAD ── */
+  .sig-wrap { border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; background: #fdfaf6; position: relative; }
+  .sig-label-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #d9c4aa; font-size: 0.85rem; pointer-events: none; font-style: italic; transition: opacity 0.2s; white-space: nowrap; }
+  canvas.sig-canvas { display: block; width: 100%; height: 140px; touch-action: none; }
+  .sig-actions { display: flex; gap: 0.7rem; margin-top: 0.6rem; }
+  .btn-clear-sig { padding: 0.4rem 1rem; font-size: 0.8rem; font-weight: 700; border: 1.5px solid var(--border); border-radius: 4px; background: transparent; color: var(--text-light); cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s; }
+  .btn-clear-sig:hover { border-color: var(--rust); color: var(--rust); }
+
+  /* ── PDF CARDS ── */
+  .pdf-card { border: 1.5px solid var(--border); border-radius: 8px; padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.2rem; margin-bottom: 1rem; background: #fdfaf6; }
+  .pdf-icon { font-size: 2rem; flex-shrink: 0; }
+  .pdf-info { flex: 1; }
+  .pdf-info strong { display: block; font-size: 0.95rem; color: var(--warm-brown); }
+  .pdf-info span { font-size: 0.8rem; color: var(--text-light); }
+  .btn-pdf { padding: 0.55rem 1.1rem; background: var(--warm-brown); color: #fff; border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s; }
+  .btn-pdf:hover { background: var(--rust); }
+
+  /* ── INFO NOTE ── */
+  .info-note { background: #fef9f0; border: 1px solid #e8d5b0; border-radius: 6px; padding: 0.9rem 1.2rem; font-size: 0.83rem; color: var(--text-light); display: flex; gap: 0.6rem; align-items: flex-start; margin-bottom: 1rem; }
+  .info-note span { font-size: 1.1rem; flex-shrink: 0; }
+
+  /* ── DATE DISPLAY ── */
+  .date-display { padding: 0.7rem 0.9rem; border: 1.5px solid var(--border); border-radius: 6px; background: #f0ece6; color: var(--text-light); font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+  /* ── NAV BUTTONS ── */
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .btn-back, .btn-next, .btn-submit { padding: 0.85rem 2rem; border-radius: 6px; font-family: 'Lato', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-back { background: transparent; border: 1.5px solid var(--border); color: var(--text-light); }
+  .btn-back:hover { border-color: var(--warm-brown); color: var(--warm-brown); }
+  .btn-next { background: var(--gold); color: #3b2012; }
+  .btn-next:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .btn-submit { background: var(--sage); color: #fff; }
+  .btn-submit:hover { background: #5c7050; transform: translateY(-1px); }
+  .btn-submit:disabled { background: #aaa; cursor: not-allowed; transform: none; }
+
+  /* ── SUBMITTING OVERLAY ── */
+  #submitting-overlay {
+    display: none; position: fixed; inset: 0; z-index: 2000;
+    background: rgba(59,32,18,0.85); flex-direction: column;
+    align-items: center; justify-content: center; gap: 1.5rem;
+  }
+  #submitting-overlay.active { display: flex; }
+  .spinner { width: 50px; height: 50px; border: 4px solid rgba(200,151,58,0.3); border-top-color: var(--gold-light); border-radius: 50%; animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .submitting-text { color: var(--gold-light); font-family: 'Playfair Display', serif; font-size: 1.4rem; }
+  .submitting-sub { color: #c4a882; font-size: 0.85rem; }
+
+  /* ── SUCCESS SCREEN ── */
+  #success-screen { display: none; text-align: center; background: var(--white); border-radius: 12px; box-shadow: var(--shadow); padding: 4rem 2rem; border: 1px solid var(--border); }
+  .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+  .success-title { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--warm-brown); margin-bottom: 0.5rem; }
+  .success-sub { color: var(--text-light); margin-bottom: 0.5rem; font-size: 0.95rem; }
+  .success-folder { margin: 1.5rem auto; display: inline-block; padding: 0.7rem 1.5rem; background: #fef9f0; border: 1.5px solid var(--gold); border-radius: 6px; font-size: 0.85rem; color: var(--warm-brown); text-decoration: none; font-weight: 700; }
+  .success-folder:hover { background: #fdecc4; }
+
+  @media (max-width: 600px) {
+    .field-row.cols-2, .field-row.cols-3 { grid-template-columns: 1fr; }
+    main { padding: 1.5rem 1rem 3rem; }
+    .section-body { padding: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SUBMITTING OVERLAY ══ -->
+<div id="submitting-overlay">
+  <div class="spinner"></div>
+  <div class="submitting-text" id="overlay-title">Submitting your form…</div>
+  <div class="submitting-sub" id="overlay-sub">Uploading documents to Google Drive</div>
+</div>
+
+<!-- ══ LANGUAGE SCREEN ══ -->
+<div id="lang-screen">
+  <div class="lang-logo">🍣 Welcome<span>New Employee Onboarding</span></div>
+  <div class="lang-subtitle" id="lang-prompt">Please select your preferred language</div>
+  <div class="lang-divider"></div>
+  <div class="lang-buttons">
+    <button class="lang-btn" onclick="selectLang('en')">🇺🇸 &nbsp; English</button>
+    <button class="lang-btn" onclick="selectLang('es')">🇲🇽 &nbsp; Español</button>
+    <button class="lang-btn" onclick="selectLang('ko')">🇰🇷 &nbsp; 한국어</button>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div id="app">
+  <header>
+    <div class="header-brand">🍣 New Hire Onboarding<span>Employee Checklist</span></div>
+    <div class="header-sub" id="header-sub">Complete all sections below</div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-steps">
+      <div class="step-pill active" id="pill-0"><span id="pill-label-0">A. Info</span></div>
+      <div class="step-pill" id="pill-1"><span id="pill-label-1">B. W-4</span></div>
+      <div class="step-pill" id="pill-2"><span id="pill-label-2">C. I-9</span></div>
+      <div class="step-pill" id="pill-3"><span id="pill-label-3">D. Documents</span></div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ══ SECTION A ══ -->
+    <div class="section-card active" id="section-0">
+      <div class="section-header">
+        <div class="section-icon">👤</div>
+        <div>
+          <div class="section-title" id="title-A">A. Employee Information</div>
+          <div class="section-subtitle" id="sub-A">Please fill in your personal details accurately</div>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <div class="field-row cols-3">
+          <div class="field"><label id="lbl-first">First Name <span class="req">*</span></label><input type="text" id="fname" placeholder="First name" /></div>
+          <div class="field"><label id="lbl-last">Last Name <span class="req">*</span></label><input type="text" id="lname" placeholder="Last name" /></div>
+          <div class="field"><label id="lbl-mi">Middle Initial</label><input type="text" id="mi" placeholder="M.I." maxlength="2" /></div>
+        </div>
+
+        <div class="field-row">
+          <div class="field"><label id="lbl-street">Street Address <span class="req">*</span></label><input type="text" id="street" placeholder="123 Main Street" /></div>
+        </div>
+        <div class="field-row cols-2">
+          <div class="field"><label id="lbl-apt">Apartment / Unit #</label><input type="text" id="apt" placeholder="Apt, Suite, Unit…" /></div>
+          <div></div>
+        </div>
+        <div class="field-row cols-3">
+          <div class="field"><label id="lbl-city">City <span class="req">*</span></label><input type="text" id="city" placeholder="Las Vegas" /></div>
+          <div class="field">
+            <label id="lbl-state">State <span class="req">*</span></label>
+            <select id="state">
+              <option value="">— State —</option>
+              <option value="NV" selected>NV – Nevada</option>
+              <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option><option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option><option value="CT">CT</option><option value="DE">DE</option><option value="FL">FL</option><option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option><option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option><option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option><option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option><option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option><option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option><option value="NH">NH</option><option value="NJ">NJ</option><option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option><option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option><option value="OR">OR</option><option value="PA">PA</option><option value="RI">RI</option><option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option><option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option><option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option><option value="WI">WI</option><option value="WY">WY</option>
+            </select>
+          </div>
+          <div class="field"><label id="lbl-zip">ZIP Code <span class="req">*</span></label><input type="text" id="zip" placeholder="89101" maxlength="10" /></div>
+        </div>
+
+        <div class="field-row cols-2">
+          <div class="field"><label id="lbl-phone">Phone Number <span class="req">*</span></label><input type="tel" id="phone" placeholder="(702) 555-0000" /></div>
+          <div></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field" style="margin-bottom:1.2rem">
+          <label id="lbl-position">Position <span class="req">*</span></label>
+          <div class="position-grid">
+            <label class="pos-opt"><input type="radio" name="position" value="Manager" /><span id="pos-manager">Manager</span></label>
+            <label class="pos-opt"><input type="radio" name="position" value="Server" /><span id="pos-server">Server</span></label>
+            <label class="pos-opt"><input type="radio" name="position" value="Sushi Chef" /><span id="pos-sushi">Sushi Chef</span></label>
+            <label class="pos-opt"><input type="radio" name="position" value="Busser" /><span id="pos-busser">Busser</span></label>
+            <label class="pos-opt"><input type="radio" name="position" value="Kitchen" /><span id="pos-kitchen">Kitchen</span></label>
+            <label class="pos-opt"><input type="radio" name="position" value="Other" /><span id="pos-other-label">Other</span></label>
+          </div>
+          <input type="text" id="position-other" placeholder="Please specify…" style="margin-top:0.7rem;display:none" />
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field" style="margin-bottom:1.2rem">
+          <label id="lbl-food">Nevada Food Handler Card <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="foodcard" value="yes" /><span id="food-yes">✅ Yes</span></label>
+            <label class="radio-opt"><input type="radio" name="foodcard" value="no" /><span id="food-no">❌ No</span></label>
+          </div>
+          <div id="foodcard-upload" style="display:none;margin-top:0.9rem">
+            <div class="upload-zone">
+              <input type="file" id="foodcard-file" accept="image/*,.pdf" onchange="previewFile(this,'foodcard-name')" />
+              <div class="upload-icon">🪪</div>
+              <div class="upload-text"><strong id="upload-food-label">Upload Food Handler Card</strong><span id="upload-food-sub">Click to browse or drag & drop</span></div>
+              <div class="file-preview" id="foodcard-name"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:1.2rem">
+          <label id="lbl-tam">TAM Card <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="tamcard" value="yes" /><span id="tam-yes">✅ Yes</span></label>
+            <label class="radio-opt"><input type="radio" name="tamcard" value="no" /><span id="tam-no">❌ No</span></label>
+          </div>
+          <div id="tamcard-upload" style="display:none;margin-top:0.9rem">
+            <div class="upload-zone">
+              <input type="file" id="tamcard-file" accept="image/*,.pdf" onchange="previewFile(this,'tamcard-name')" />
+              <div class="upload-icon">🃏</div>
+              <div class="upload-text"><strong id="upload-tam-label">Upload TAM Card</strong><span id="upload-tam-sub">Click to browse or drag & drop</span></div>
+              <div class="file-preview" id="tamcard-name"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label id="lbl-sig">Employee Signature <span class="req">*</span></label>
+          <div class="sig-wrap">
+            <div class="sig-label-overlay" id="sig-overlay-A">Sign here with your mouse or finger</div>
+            <canvas class="sig-canvas" id="sigCanvas-A"></canvas>
+          </div>
+          <div class="sig-actions"><button class="btn-clear-sig" onclick="clearSig('A')" id="btn-clear-A">Clear Signature</button></div>
+        </div>
+
+        <div class="nav-row">
+          <div></div>
+          <button class="btn-next" onclick="nextStep(0)" id="btn-next-0">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SECTION B: W-4 ══ -->
+    <div class="section-card" id="section-1">
+      <div class="section-header">
+        <div class="section-icon">📋</div>
+        <div>
+          <div class="section-title" id="title-B">B. W-4 — Employee's Withholding Certificate</div>
+          <div class="section-subtitle" id="sub-B">Download, complete, and upload the signed form</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="info-note"><span>ℹ️</span><div id="w4-note">The W-4 is a federal tax withholding form required by the IRS. Please download the official form, fill it out, sign it, and upload the completed version below.</div></div>
+        <div class="pdf-card">
+          <div class="pdf-icon">📄</div>
+          <div class="pdf-info"><strong id="w4-pdf-title">IRS Form W-4 (2024)</strong><span id="w4-pdf-sub">Employee's Withholding Certificate — irs.gov</span></div>
+          <a class="btn-pdf" href="https://www.irs.gov/pub/irs-pdf/fw4.pdf" target="_blank" id="btn-w4-download">Download PDF</a>
+        </div>
+        <div class="divider"></div>
+        <div class="field">
+          <label id="lbl-w4-upload">Upload Completed & Signed W-4 <span class="req">*</span></label>
+          <div class="upload-zone">
+            <input type="file" id="w4-file" accept="image/*,.pdf" onchange="previewFile(this,'w4-name')" />
+            <div class="upload-icon">📤</div>
+            <div class="upload-text"><strong id="upload-w4-label">Upload your signed W-4</strong><span id="upload-w4-sub">PDF or image accepted</span></div>
+            <div class="file-preview" id="w4-name"></div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="btn-back" onclick="prevStep(1)" id="btn-back-1">← Back</button>
+          <button class="btn-next" onclick="nextStep(1)" id="btn-next-1">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SECTION C: I-9 ══ -->
+    <div class="section-card" id="section-2">
+      <div class="section-header">
+        <div class="section-icon">🇺🇸</div>
+        <div>
+          <div class="section-title" id="title-C">C. I-9 — Employment Eligibility Verification</div>
+          <div class="section-subtitle" id="sub-C">Download, complete, and upload the signed form</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="info-note"><span>ℹ️</span><div id="i9-note">The I-9 verifies your identity and authorization to work in the United States. Download, complete Section 1, sign, and upload below.</div></div>
+        <div class="pdf-card">
+          <div class="pdf-icon">📄</div>
+          <div class="pdf-info"><strong id="i9-pdf-title">USCIS Form I-9 (2023)</strong><span id="i9-pdf-sub">Employment Eligibility Verification — uscis.gov</span></div>
+          <a class="btn-pdf" href="https://www.uscis.gov/sites/default/files/document/forms/i-9.pdf" target="_blank" id="btn-i9-download">Download PDF</a>
+        </div>
+        <div class="divider"></div>
+        <div class="field">
+          <label id="lbl-i9-upload">Upload Completed & Signed I-9 <span class="req">*</span></label>
+          <div class="upload-zone">
+            <input type="file" id="i9-file" accept="image/*,.pdf" onchange="previewFile(this,'i9-name')" />
+            <div class="upload-icon">📤</div>
+            <div class="upload-text"><strong id="upload-i9-label">Upload your signed I-9</strong><span id="upload-i9-sub">PDF or image accepted</span></div>
+            <div class="file-preview" id="i9-name"></div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="btn-back" onclick="prevStep(2)" id="btn-back-2">← Back</button>
+          <button class="btn-next" onclick="nextStep(2)" id="btn-next-2">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SECTION D: DOCUMENTS ══ -->
+    <div class="section-card" id="section-3">
+      <div class="section-header">
+        <div class="section-icon">🪪</div>
+        <div>
+          <div class="section-title" id="title-D">D. Identity Documents</div>
+          <div class="section-subtitle" id="sub-D">Upload your Social Security Card and Driver's License</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="info-note"><span>🔒</span><div id="doc-note">Your documents are stored securely in our private Google Drive and used only for employment verification.</div></div>
+
+        <div class="field-row cols-2">
+          <div class="field">
+            <label id="lbl-ssn">Social Security Card <span class="req">*</span></label>
+            <div class="upload-zone">
+              <input type="file" id="ssn-file" accept="image/*,.pdf" onchange="previewFile(this,'ssn-name')" />
+              <div class="upload-icon">🔒</div>
+              <div class="upload-text"><strong id="upload-ssn-label">Upload SS Card</strong><span id="upload-ssn-sub">Photo or scan</span></div>
+              <div class="file-preview" id="ssn-name"></div>
+            </div>
+          </div>
+          <div class="field">
+            <label id="lbl-dl">Driver's License / ID <span class="req">*</span></label>
+            <div class="upload-zone">
+              <input type="file" id="dl-file" accept="image/*,.pdf" onchange="previewFile(this,'dl-name')" />
+              <div class="upload-icon">🪪</div>
+              <div class="upload-text"><strong id="upload-dl-label">Upload Driver's License</strong><span id="upload-dl-sub">Front side</span></div>
+              <div class="file-preview" id="dl-name"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field" style="margin-bottom:1.5rem">
+          <label id="lbl-date">Date Submitted</label>
+          <div class="date-display">📅 <span id="today-date"></span></div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-sig-final">Acknowledgment Signature <span class="req">*</span></label>
+          <div class="sig-wrap">
+            <div class="sig-label-overlay" id="sig-overlay-D">Sign here with your mouse or finger</div>
+            <canvas class="sig-canvas" id="sigCanvas-D"></canvas>
+          </div>
+          <div class="sig-actions"><button class="btn-clear-sig" onclick="clearSig('D')" id="btn-clear-D">Clear Signature</button></div>
+        </div>
+
+        <div class="nav-row">
+          <button class="btn-back" onclick="prevStep(3)" id="btn-back-3">← Back</button>
+          <button class="btn-submit" onclick="submitForm()" id="btn-submit">✓ Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SUCCESS SCREEN ══ -->
+    <div id="success-screen">
+      <div class="success-icon">🎉</div>
+      <div class="success-title" id="success-title">Welcome to the Team!</div>
+      <div class="success-sub" id="success-sub">Your onboarding form has been submitted successfully.</div>
+      <div class="success-sub" id="success-sub2">Our HR team will review your documents and reach out with next steps.</div>
+      <a id="folder-link" class="success-folder" href="#" target="_blank" style="display:none">📁 View Your Document Folder</a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  ★ STEP 5: PASTE YOUR APPS SCRIPT WEB APP URL HERE ★
+// ══════════════════════════════════════════════════════════════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1B_FZZDhIr7xyZtsSIUwqLkwrJJsmfVdkLzHWHl_VDF4fjZZ5qfnsFqQyyjiR1Dx3ww/exec';
+
+// ══════════════════════════════════════════════════════════════
+//  TRANSLATIONS
+// ══════════════════════════════════════════════════════════════
+const T = {
+  en: {
+    headerSub: 'Complete all sections below',
+    pillLabels: ['A. Info', 'B. W-4', 'C. I-9', 'D. Documents'],
+    titleA: 'A. Employee Information', subA: 'Please fill in your personal details accurately',
+    lblFirst: 'First Name', lblLast: 'Last Name', lblMI: 'Middle Initial',
+    lblStreet: 'Street Address', lblApt: 'Apartment / Unit #',
+    lblCity: 'City', lblState: 'State', lblZip: 'ZIP Code', lblPhone: 'Phone Number',
+    lblPosition: 'Position',
+    posManager: 'Manager', posServer: 'Server', posSushi: 'Sushi Chef', posBusser: 'Busser', posKitchen: 'Kitchen', posOther: 'Other',
+    lblFood: 'Nevada Food Handler Card', foodYes: '✅ Yes', foodNo: '❌ No',
+    uploadFoodLabel: 'Upload Food Handler Card', uploadFoodSub: 'Click to browse or drag & drop',
+    lblTam: 'TAM Card', tamYes: '✅ Yes', tamNo: '❌ No',
+    uploadTamLabel: 'Upload TAM Card', uploadTamSub: 'Click to browse or drag & drop',
+    lblSig: 'Employee Signature', sigHint: 'Sign here with your mouse or finger', clearSig: 'Clear Signature',
+    titleB: "B. W-4 — Employee's Withholding Certificate", subB: 'Download, complete, and upload the signed form',
+    w4Note: 'The W-4 is a federal tax withholding form required by the IRS. Please download the official form, fill it out, sign it, and upload the completed version below.',
+    w4PdfTitle: 'IRS Form W-4 (2024)', w4PdfSub: "Employee's Withholding Certificate — irs.gov",
+    w4Download: 'Download PDF', lblW4Upload: 'Upload Completed & Signed W-4',
+    uploadW4Label: 'Upload your signed W-4', uploadW4Sub: 'PDF or image accepted',
+    titleC: 'C. I-9 — Employment Eligibility Verification', subC: 'Download, complete, and upload the signed form',
+    i9Note: 'The I-9 verifies your identity and authorization to work in the United States. Download, complete Section 1, sign, and upload below.',
+    i9PdfTitle: 'USCIS Form I-9 (2023)', i9PdfSub: 'Employment Eligibility Verification — uscis.gov',
+    i9Download: 'Download PDF', lblI9Upload: 'Upload Completed & Signed I-9',
+    uploadI9Label: 'Upload your signed I-9', uploadI9Sub: 'PDF or image accepted',
+    titleD: 'D. Identity Documents', subD: "Upload your Social Security Card and Driver's License",
+    docNote: 'Your documents are stored securely in our private Google Drive and used only for employment verification.',
+    lblSSN: 'Social Security Card', uploadSSNLabel: 'Upload SS Card', uploadSSNSub: 'Photo or scan',
+    lblDL: "Driver's License / ID", uploadDLLabel: "Upload Driver's License", uploadDLSub: 'Front side',
+    lblDate: 'Date Submitted', lblSigFinal: 'Acknowledgment Signature',
+    sigFinalHint: 'Sign here with your mouse or finger',
+    btnNext: 'Next →', btnBack: '← Back', btnSubmit: '✓ Submit',
+    overlayTitle: 'Submitting your form…', overlaySub: 'Uploading documents to Google Drive',
+    successTitle: 'Welcome to the Team!',
+    successSub: 'Your onboarding form has been submitted successfully.',
+    successSub2: 'Our HR team will review your documents and reach out with next steps.',
+    folderLink: '📁 View Your Document Folder',
+    alertRequired: 'Please fill in all required fields.',
+    alertSig: 'Please provide your signature.',
+    alertSSN: 'Please upload your Social Security Card.',
+    alertDL: "Please upload your Driver's License.",
+    alertScript: 'Submission URL not configured. Please contact HR.',
+    alertError: 'Submission failed. Please try again or contact HR.',
+  },
+  es: {
+    headerSub: 'Complete todas las secciones a continuación',
+    pillLabels: ['A. Info', 'B. W-4', 'C. I-9', 'D. Documentos'],
+    titleA: 'A. Información del Empleado', subA: 'Por favor complete sus datos personales con precisión',
+    lblFirst: 'Nombre', lblLast: 'Apellido', lblMI: 'Inicial del segundo nombre',
+    lblStreet: 'Dirección', lblApt: 'Apt / Unidad #',
+    lblCity: 'Ciudad', lblState: 'Estado', lblZip: 'Código Postal', lblPhone: 'Número de Teléfono',
+    lblPosition: 'Puesto',
+    posManager: 'Gerente', posServer: 'Mesero/a', posSushi: 'Chef de Sushi', posBusser: 'Busser', posKitchen: 'Cocina', posOther: 'Otro',
+    lblFood: 'Tarjeta de Manipulador de Alimentos de Nevada', foodYes: '✅ Sí', foodNo: '❌ No',
+    uploadFoodLabel: 'Subir Tarjeta de Alimentos', uploadFoodSub: 'Haga clic o arrastre el archivo',
+    lblTam: 'Tarjeta TAM', tamYes: '✅ Sí', tamNo: '❌ No',
+    uploadTamLabel: 'Subir Tarjeta TAM', uploadTamSub: 'Haga clic o arrastre el archivo',
+    lblSig: 'Firma del Empleado', sigHint: 'Firme aquí con su ratón o dedo', clearSig: 'Borrar Firma',
+    titleB: 'B. W-4 — Certificado de Retención', subB: 'Descargue, complete y suba el formulario firmado',
+    w4Note: 'El W-4 es el formulario federal de retención de impuestos requerido por el IRS. Descargue, llénelo, fírmelo y suba la versión completa.',
+    w4PdfTitle: 'Formulario IRS W-4 (2024)', w4PdfSub: 'Certificado de Retención — irs.gov',
+    w4Download: 'Descargar PDF', lblW4Upload: 'Subir W-4 Completado y Firmado',
+    uploadW4Label: 'Subir su W-4 firmado', uploadW4Sub: 'PDF o imagen aceptado',
+    titleC: 'C. I-9 — Verificación de Elegibilidad', subC: 'Descargue, complete y suba el formulario firmado',
+    i9Note: 'El I-9 verifica su identidad y autorización para trabajar en EE.UU. Descargue, complete la Sección 1, firme y suba.',
+    i9PdfTitle: 'Formulario USCIS I-9 (2023)', i9PdfSub: 'Verificación de Elegibilidad — uscis.gov',
+    i9Download: 'Descargar PDF', lblI9Upload: 'Subir I-9 Completado y Firmado',
+    uploadI9Label: 'Subir su I-9 firmado', uploadI9Sub: 'PDF o imagen aceptado',
+    titleD: 'D. Documentos de Identidad', subD: 'Suba su Tarjeta de Seguro Social y Licencia de Conducir',
+    docNote: 'Sus documentos se almacenan de forma segura en Google Drive y se usan solo para verificación de empleo.',
+    lblSSN: 'Tarjeta de Seguro Social', uploadSSNLabel: 'Subir Tarjeta SS', uploadSSNSub: 'Foto o escaneo',
+    lblDL: 'Licencia de Conducir / ID', uploadDLLabel: 'Subir Licencia', uploadDLSub: 'Lado frontal',
+    lblDate: 'Fecha de Envío', lblSigFinal: 'Firma de Reconocimiento',
+    sigFinalHint: 'Firme aquí con su ratón o dedo',
+    btnNext: 'Siguiente →', btnBack: '← Atrás', btnSubmit: '✓ Enviar',
+    overlayTitle: 'Enviando su formulario…', overlaySub: 'Subiendo documentos a Google Drive',
+    successTitle: '¡Bienvenido al Equipo!',
+    successSub: 'Su formulario de incorporación se envió con éxito.',
+    successSub2: 'Nuestro equipo de RR.HH. revisará sus documentos y se comunicará con usted.',
+    folderLink: '📁 Ver Su Carpeta de Documentos',
+    alertRequired: 'Por favor complete todos los campos obligatorios.',
+    alertSig: 'Por favor proporcione su firma.',
+    alertSSN: 'Por favor suba su Tarjeta de Seguro Social.',
+    alertDL: 'Por favor suba su Licencia de Conducir.',
+    alertScript: 'URL no configurada. Contacte a RR.HH.',
+    alertError: 'Error al enviar. Intente de nuevo o contacte a RR.HH.',
+  },
+  ko: {
+    headerSub: '아래의 모든 섹션을 작성해 주세요',
+    pillLabels: ['A. 정보', 'B. W-4', 'C. I-9', 'D. 서류'],
+    titleA: 'A. 직원 정보', subA: '개인 정보를 정확하게 입력해 주세요',
+    lblFirst: '이름', lblLast: '성', lblMI: '중간 이름 이니셜',
+    lblStreet: '주소', lblApt: '아파트 / 호수',
+    lblCity: '도시', lblState: '주', lblZip: '우편번호', lblPhone: '전화번호',
+    lblPosition: '직책',
+    posManager: '매니저', posServer: '서버', posSushi: '스시 셰프', posBusser: '버서', posKitchen: '주방', posOther: '기타',
+    lblFood: '네바다 식품위생 카드', foodYes: '✅ 예', foodNo: '❌ 아니오',
+    uploadFoodLabel: '식품위생 카드 업로드', uploadFoodSub: '클릭하거나 파일을 끌어다 놓으세요',
+    lblTam: 'TAM 카드', tamYes: '✅ 예', tamNo: '❌ 아니오',
+    uploadTamLabel: 'TAM 카드 업로드', uploadTamSub: '클릭하거나 파일을 끌어다 놓으세요',
+    lblSig: '직원 서명', sigHint: '마우스 또는 손가락으로 여기에 서명하세요', clearSig: '서명 지우기',
+    titleB: 'B. W-4 — 원천징수 증명서', subB: 'PDF를 다운로드하여 작성 후 업로드하세요',
+    w4Note: 'W-4는 IRS에서 요구하는 연방 세금 원천징수 양식입니다. 공식 양식을 다운로드하여 작성하고 서명한 후 업로드하세요.',
+    w4PdfTitle: 'IRS W-4 양식 (2024)', w4PdfSub: '직원 원천징수 증명서 — irs.gov',
+    w4Download: 'PDF 다운로드', lblW4Upload: '완성 및 서명된 W-4 업로드',
+    uploadW4Label: '서명된 W-4 업로드', uploadW4Sub: 'PDF 또는 이미지 허용',
+    titleC: 'C. I-9 — 고용 자격 확인', subC: 'PDF를 다운로드하여 작성 후 업로드하세요',
+    i9Note: 'I-9 양식은 미국에서 일할 수 있는 신원 및 자격을 확인합니다. 섹션 1을 작성하고 서명한 후 업로드하세요.',
+    i9PdfTitle: 'USCIS I-9 양식 (2023)', i9PdfSub: '고용 자격 확인 — uscis.gov',
+    i9Download: 'PDF 다운로드', lblI9Upload: '완성 및 서명된 I-9 업로드',
+    uploadI9Label: '서명된 I-9 업로드', uploadI9Sub: 'PDF 또는 이미지 허용',
+    titleD: 'D. 신분 서류', subD: '소셜 시큐리티 카드와 운전면허증을 업로드하세요',
+    docNote: '귀하의 서류는 Google Drive에 안전하게 저장되며 고용 확인 목적으로만 사용됩니다.',
+    lblSSN: '소셜 시큐리티 카드', uploadSSNLabel: 'SS 카드 업로드', uploadSSNSub: '사진 또는 스캔',
+    lblDL: '운전면허증 / ID', uploadDLLabel: '운전면허증 업로드', uploadDLSub: '앞면',
+    lblDate: '제출 날짜', lblSigFinal: '확인 서명',
+    sigFinalHint: '마우스 또는 손가락으로 여기에 서명하세요',
+    btnNext: '다음 →', btnBack: '← 이전', btnSubmit: '✓ 제출',
+    overlayTitle: '양식을 제출하는 중…', overlaySub: 'Google Drive에 문서를 업로드하는 중',
+    successTitle: '팀에 오신 것을 환영합니다!',
+    successSub: '입사 지원서가 성공적으로 제출되었습니다.',
+    successSub2: 'HR 팀이 서류를 검토하고 연락드리겠습니다.',
+    folderLink: '📁 내 서류 폴더 보기',
+    alertRequired: '모든 필수 항목을 입력해 주세요.',
+    alertSig: '서명을 제공해 주세요.',
+    alertSSN: '소셜 시큐리티 카드를 업로드해 주세요.',
+    alertDL: '운전면허증을 업로드해 주세요.',
+    alertScript: 'URL이 설정되지 않았습니다. HR에 문의하세요.',
+    alertError: '제출에 실패했습니다. 다시 시도하거나 HR에 문의하세요.',
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let lang = 'en';
+let currentStep = 0;
+const sigs = {
+  A: { canvas: null, ctx: null, drawing: false, hasData: false },
+  D: { canvas: null, ctx: null, drawing: false, hasData: false }
+};
+
+// ══════════════════════════════════════════════════════════════
+//  LANGUAGE
+// ══════════════════════════════════════════════════════════════
+function selectLang(l) {
+  lang = l;
+  document.getElementById('lang-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  applyTranslations();
+  initSignatures();
+  setTodayDate();
+}
+
+function applyTranslations() {
+  const t = T[lang];
+  setText('header-sub', t.headerSub);
+  [0,1,2,3].forEach(i => setText('pill-label-'+i, t.pillLabels[i]));
+  setText('title-A', t.titleA); setText('sub-A', t.subA);
+  setText('lbl-first', t.lblFirst + ' *'); setText('lbl-last', t.lblLast + ' *'); setText('lbl-mi', t.lblMI);
+  setText('lbl-street', t.lblStreet + ' *'); setText('lbl-apt', t.lblApt);
+  setText('lbl-city', t.lblCity + ' *'); setText('lbl-state', t.lblState + ' *'); setText('lbl-zip', t.lblZip + ' *');
+  setText('lbl-phone', t.lblPhone + ' *'); setText('lbl-position', t.lblPosition + ' *');
+  setText('pos-manager', t.posManager); setText('pos-server', t.posServer); setText('pos-sushi', t.posSushi);
+  setText('pos-busser', t.posBusser); setText('pos-kitchen', t.posKitchen); setText('pos-other-label', t.posOther);
+  setText('lbl-food', t.lblFood + ' *'); setText('food-yes', t.foodYes); setText('food-no', t.foodNo);
+  setText('upload-food-label', t.uploadFoodLabel); setText('upload-food-sub', t.uploadFoodSub);
+  setText('lbl-tam', t.lblTam + ' *'); setText('tam-yes', t.tamYes); setText('tam-no', t.tamNo);
+  setText('upload-tam-label', t.uploadTamLabel); setText('upload-tam-sub', t.uploadTamSub);
+  setText('lbl-sig', t.lblSig + ' *'); setText('sig-overlay-A', t.sigHint); setText('btn-clear-A', t.clearSig);
+  setText('title-B', t.titleB); setText('sub-B', t.subB); setText('w4-note', t.w4Note);
+  setText('w4-pdf-title', t.w4PdfTitle); setText('w4-pdf-sub', t.w4PdfSub); setText('btn-w4-download', t.w4Download);
+  setText('lbl-w4-upload', t.lblW4Upload + ' *'); setText('upload-w4-label', t.uploadW4Label); setText('upload-w4-sub', t.uploadW4Sub);
+  setText('title-C', t.titleC); setText('sub-C', t.subC); setText('i9-note', t.i9Note);
+  setText('i9-pdf-title', t.i9PdfTitle); setText('i9-pdf-sub', t.i9PdfSub); setText('btn-i9-download', t.i9Download);
+  setText('lbl-i9-upload', t.lblI9Upload + ' *'); setText('upload-i9-label', t.uploadI9Label); setText('upload-i9-sub', t.uploadI9Sub);
+  setText('title-D', t.titleD); setText('sub-D', t.subD); setText('doc-note', t.docNote);
+  setText('lbl-ssn', t.lblSSN + ' *'); setText('upload-ssn-label', t.uploadSSNLabel); setText('upload-ssn-sub', t.uploadSSNSub);
+  setText('lbl-dl', t.lblDL + ' *'); setText('upload-dl-label', t.uploadDLLabel); setText('upload-dl-sub', t.uploadDLSub);
+  setText('lbl-date', t.lblDate); setText('lbl-sig-final', t.lblSigFinal + ' *');
+  setText('sig-overlay-D', t.sigFinalHint); setText('btn-clear-D', t.clearSig);
+  setText('btn-next-0', t.btnNext); setText('btn-next-1', t.btnNext); setText('btn-next-2', t.btnNext);
+  setText('btn-back-1', t.btnBack); setText('btn-back-2', t.btnBack); setText('btn-back-3', t.btnBack);
+  setText('btn-submit', t.btnSubmit);
+  setText('overlay-title', t.overlayTitle); setText('overlay-sub', t.overlaySub);
+}
+
+function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+
+// ══════════════════════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════════════════════
+function setTodayDate() {
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+function previewFile(input, targetId) {
+  if (input.files && input.files.length)
+    document.getElementById(targetId).textContent = '✅ ' + input.files[0].name;
+}
+
+// Read file as base64 for sending to Apps Script
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  FORM EVENTS
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('change', function(e) {
+  if (e.target.name === 'position')
+    document.getElementById('position-other').style.display = e.target.value === 'Other' ? 'block' : 'none';
+  if (e.target.name === 'foodcard')
+    document.getElementById('foodcard-upload').style.display = e.target.value === 'yes' ? 'block' : 'none';
+  if (e.target.name === 'tamcard')
+    document.getElementById('tamcard-upload').style.display = e.target.value === 'yes' ? 'block' : 'none';
+});
+
+// Phone formatting
+document.addEventListener('DOMContentLoaded', () => {
+  const ph = document.getElementById('phone');
+  if (ph) ph.addEventListener('input', function() {
+    let v = this.value.replace(/\D/g,'').substring(0,10);
+    if (v.length >= 6) v = '('+v.substring(0,3)+') '+v.substring(3,6)+'-'+v.substring(6);
+    else if (v.length >= 3) v = '('+v.substring(0,3)+') '+v.substring(3);
+    this.value = v;
+  });
+});
+
+// ══════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════════════
+function goToStep(step) {
+  document.querySelectorAll('.section-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.step-pill').forEach((p,i) => {
+    p.classList.remove('active','done');
+    if (i < step) p.classList.add('done');
+    if (i === step) p.classList.add('active');
+  });
+  document.getElementById('section-'+step).classList.add('active');
+  currentStep = step;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextStep(from) { if (validateStep(from)) goToStep(from + 1); }
+function prevStep(from) { goToStep(from - 1); }
+
+function validateStep(step) {
+  const t = T[lang];
+  if (step === 0) {
+    const req = ['fname','lname','street','city','zip','phone'];
+    let ok = true;
+    req.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) { el.classList.add('invalid'); ok = false; }
+      else el.classList.remove('invalid');
+    });
+    if (!document.getElementById('state').value) { document.getElementById('state').classList.add('invalid'); ok = false; }
+    else document.getElementById('state').classList.remove('invalid');
+    if (!document.querySelector('input[name="position"]:checked')) { alert(t.alertRequired); return false; }
+    if (!document.querySelector('input[name="foodcard"]:checked')) { alert(t.alertRequired); return false; }
+    if (!document.querySelector('input[name="tamcard"]:checked')) { alert(t.alertRequired); return false; }
+    if (!sigs.A.hasData) { alert(t.alertSig); return false; }
+    if (!ok) { alert(t.alertRequired); return false; }
+  }
+  return true;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SUBMIT — collects everything, sends to Apps Script
+// ══════════════════════════════════════════════════════════════
+async function submitForm() {
+  const t = T[lang];
+
+  if (APPS_SCRIPT_URL === 'PASTE_YOUR_APPS_SCRIPT_URL_HERE') {
+    alert(t.alertScript); return;
+  }
+  if (!document.getElementById('ssn-file').files.length) { alert(t.alertSSN); return; }
+  if (!document.getElementById('dl-file').files.length) { alert(t.alertDL); return; }
+  if (!sigs.D.hasData) { alert(t.alertSig); return; }
+
+  // Show spinner
+  document.getElementById('submitting-overlay').classList.add('active');
+  document.getElementById('btn-submit').disabled = true;
+
+  try {
+    // Collect all files
+    const files = {};
+    const fileInputs = {
+      foodCard: 'foodcard-file', tamCard: 'tamcard-file',
+      w4: 'w4-file', i9: 'i9-file',
+      ssn: 'ssn-file', dl: 'dl-file',
+    };
+    for (const [key, inputId] of Object.entries(fileInputs)) {
+      const input = document.getElementById(inputId);
+      if (input.files && input.files.length) {
+        const file = input.files[0];
+        files[key] = {
+          data: await fileToBase64(file),
+          name: file.name,
+          mimeType: file.type,
+        };
+      }
+    }
+
+    // Collect signature canvases as PNG
+    ['A','D'].forEach(id => {
+      const key = id === 'A' ? 'sigA' : 'sigD';
+      if (sigs[id].hasData) {
+        const dataUrl = sigs[id].canvas.toDataURL('image/png');
+        files[key] = {
+          data: dataUrl.split(',')[1],
+          name: 'signature.png',
+          mimeType: 'image/png',
+        };
+      }
+    });
+
+    const pos = document.querySelector('input[name="position"]:checked');
+    const food = document.querySelector('input[name="foodcard"]:checked');
+    const tam  = document.querySelector('input[name="tamcard"]:checked');
+
+    const payload = {
+      language:      lang,
+      firstName:     document.getElementById('fname').value.trim(),
+      lastName:      document.getElementById('lname').value.trim(),
+      middleInitial: document.getElementById('mi').value.trim(),
+      street:        document.getElementById('street').value.trim(),
+      apt:           document.getElementById('apt').value.trim(),
+      city:          document.getElementById('city').value.trim(),
+      state:         document.getElementById('state').value,
+      zip:           document.getElementById('zip').value.trim(),
+      phone:         document.getElementById('phone').value.trim(),
+      position:      pos ? pos.value : '',
+      positionOther: document.getElementById('position-other').value.trim(),
+      foodCard:      food ? food.value : 'no',
+      tamCard:       tam  ? tam.value  : 'no',
+      files,
+    };
+
+    const resp = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    const result = await resp.json();
+
+    if (result.success) {
+      // Hide overlay and show success
+      document.getElementById('submitting-overlay').classList.remove('active');
+      document.querySelectorAll('.section-card').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.step-pill').forEach(p => p.classList.add('done'));
+      document.getElementById('success-screen').style.display = 'block';
+
+      setText('success-title', t.successTitle);
+      setText('success-sub', t.successSub);
+      setText('success-sub2', t.successSub2);
+
+      // Show folder link if available
+      if (result.folderUrl) {
+        const link = document.getElementById('folder-link');
+        link.href = result.folderUrl;
+        link.textContent = t.folderLink;
+        link.style.display = 'inline-block';
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      throw new Error(result.error || 'Unknown error');
+    }
+  } catch (err) {
+    document.getElementById('submitting-overlay').classList.remove('active');
+    document.getElementById('btn-submit').disabled = false;
+    console.error(err);
+    alert(T[lang].alertError);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SIGNATURE PAD
+// ══════════════════════════════════════════════════════════════
+function initSignatures() {
+  ['A','D'].forEach(id => {
+    const canvas = document.getElementById('sigCanvas-'+id);
+    const ctx = canvas.getContext('2d');
+    sigs[id].canvas = canvas; sigs[id].ctx = ctx;
+    resizeCanvas(id);
+    ctx.strokeStyle = '#2e1f10'; ctx.lineWidth = 2.2;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+    canvas.addEventListener('mousedown', e => startDraw(e,id,'mouse'));
+    canvas.addEventListener('mousemove', e => draw(e,id,'mouse'));
+    canvas.addEventListener('mouseup', () => stopDraw(id));
+    canvas.addEventListener('mouseleave', () => stopDraw(id));
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e,id,'touch'); }, {passive:false});
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e,id,'touch'); }, {passive:false});
+    canvas.addEventListener('touchend', () => stopDraw(id));
+  });
+}
+
+function resizeCanvas(id) {
+  const c = sigs[id].canvas;
+  const r = c.getBoundingClientRect();
+  c.width  = r.width  * window.devicePixelRatio;
+  c.height = r.height * window.devicePixelRatio;
+  sigs[id].ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+
+function getPos(e, id, type) {
+  const r = sigs[id].canvas.getBoundingClientRect();
+  if (type === 'touch') return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function startDraw(e, id, type) {
+  sigs[id].drawing = true;
+  const p = getPos(e,id,type);
+  sigs[id].ctx.beginPath(); sigs[id].ctx.moveTo(p.x, p.y);
+  document.getElementById('sig-overlay-'+id).style.opacity = '0';
+}
+function draw(e, id, type) {
+  if (!sigs[id].drawing) return;
+  const p = getPos(e,id,type);
+  sigs[id].ctx.lineTo(p.x, p.y); sigs[id].ctx.stroke();
+  sigs[id].hasData = true;
+}
+function stopDraw(id) { sigs[id].drawing = false; }
+function clearSig(id) {
+  const s = sigs[id];
+  s.ctx.clearRect(0,0,s.canvas.width,s.canvas.height);
+  s.hasData = false;
+  document.getElementById('sig-overlay-'+id).style.opacity = '1';
+}
+</script>
+</body>
+</html>
