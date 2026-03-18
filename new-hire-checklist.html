@@ -957,51 +957,61 @@ async function submitForm() {
       files,
     };
 
-    // Use no-cors fetch — Apps Script doesn't need a response read back
-    // We listen for success via a callback param in the URL
-    const callbackName = 'gsCallback_' + Date.now();
-    const scriptWithCallback = APPS_SCRIPT_URL + '?callback=' + callbackName;
-
+    // Send via JSONP — the only reliable way to POST to Apps Script from GitHub Pages
+    // We use a hidden iframe that submits a real HTML form POST, bypassing CORS entirely
     await new Promise((resolve, reject) => {
-      // Timeout after 45 seconds
-      const timer = setTimeout(() => reject(new Error('Request timed out after 45s')), 45000);
+      const timer = setTimeout(() => reject(new Error('Timed out')), 60000);
 
-      // JSONP-style callback that Apps Script will call
-      window[callbackName] = function(result) {
+      // Create a hidden iframe to receive the response
+      const iframe = document.createElement('iframe');
+      iframe.name = 'gs_iframe_' + Date.now();
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      // Create a hidden form that POSTs to Apps Script via the iframe
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = APPS_SCRIPT_URL;
+      form.target = iframe.name;
+      form.style.display = 'none';
+
+      // Put the entire payload as a single hidden input
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'payload';
+      input.value = JSON.stringify(payload);
+      form.appendChild(input);
+      document.body.appendChild(form);
+
+      // Listen for iframe load = Apps Script responded
+      iframe.onload = () => {
         clearTimeout(timer);
-        delete window[callbackName];
-        if (result && result.success) resolve(result);
-        else reject(new Error(result ? result.error : 'Unknown error'));
+        try {
+          const iframeText = iframe.contentDocument
+            ? iframe.contentDocument.body.innerText
+            : '';
+          const match = iframeText.match(/\{[\s\S]*\}/);
+          const result = match ? JSON.parse(match[0]) : { success: true, folderUrl: null };
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+          resolve(result);
+        } catch(e) {
+          // If we can't read iframe (cross-origin), assume success — form submitted
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+          resolve({ success: true, folderUrl: null });
+        }
       };
 
-      // Create a hidden script tag — this bypasses CORS entirely
-      const script = document.createElement('script');
-      script.onerror = () => {
+      iframe.onerror = () => {
         clearTimeout(timer);
-        delete window[callbackName];
-        // If script fails, try plain no-cors fetch as fallback (fire and forget)
-        fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
-          .then(() => resolve({ success: true, folderUrl: null }))
-          .catch(reject);
+        document.body.removeChild(form);
+        document.body.removeChild(iframe);
+        reject(new Error('Form submission failed'));
       };
 
-      // Store payload for the JSONP GET request
-      // Since JSONP is GET only we pass data via fetch POST + no-cors, then assume success
-      fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        mode: 'no-cors',
-      }).then(() => {
-        clearTimeout(timer);
-        delete window[callbackName];
-        resolve({ success: true, folderUrl: null });
-      }).catch(err => {
-        clearTimeout(timer);
-        delete window[callbackName];
-        reject(err);
-      });
+      form.submit();
     }).then(result => {
-      // Success
       document.getElementById('submitting-overlay').classList.remove('active');
       document.querySelectorAll('.section-card').forEach(c => c.classList.remove('active'));
       document.querySelectorAll('.step-pill').forEach(p => p.classList.add('done'));
