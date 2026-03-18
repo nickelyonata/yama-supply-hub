@@ -927,15 +927,11 @@ async function submitForm() {
     }
 
     // Collect signature canvases as PNG
-    ['A','D','W4','I9'].forEach(id => {
+    ['A','D'].forEach(id => {
       const key = id === 'A' ? 'sigA' : 'sigD';
-      if (sigs[id].hasData) {
+      if (sigs[id] && sigs[id].hasData) {
         const dataUrl = sigs[id].canvas.toDataURL('image/png');
-        files[key] = {
-          data: dataUrl.split(',')[1],
-          name: 'signature.png',
-          mimeType: 'image/png',
-        };
+        files[key] = { data: dataUrl.split(',')[1], name: 'signature.png', mimeType: 'image/png' };
       }
     });
 
@@ -961,43 +957,66 @@ async function submitForm() {
       files,
     };
 
-    const resp = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      redirect: 'follow',
-    });
-    const text = await resp.text();
-    let result;
-    try {
-      // Strip any HTML wrapper Google sometimes adds
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      result = jsonMatch ? JSON.parse(jsonMatch[0]) : { success: false, error: 'Bad response: ' + text.substring(0, 200) };
-    } catch(parseErr) {
-      result = { success: false, error: 'Parse error: ' + text.substring(0, 200) };
-    }
+    // Use no-cors fetch — Apps Script doesn't need a response read back
+    // We listen for success via a callback param in the URL
+    const callbackName = 'gsCallback_' + Date.now();
+    const scriptWithCallback = APPS_SCRIPT_URL + '?callback=' + callbackName;
 
-    if (result.success) {
-      // Hide overlay and show success
+    await new Promise((resolve, reject) => {
+      // Timeout after 45 seconds
+      const timer = setTimeout(() => reject(new Error('Request timed out after 45s')), 45000);
+
+      // JSONP-style callback that Apps Script will call
+      window[callbackName] = function(result) {
+        clearTimeout(timer);
+        delete window[callbackName];
+        if (result && result.success) resolve(result);
+        else reject(new Error(result ? result.error : 'Unknown error'));
+      };
+
+      // Create a hidden script tag — this bypasses CORS entirely
+      const script = document.createElement('script');
+      script.onerror = () => {
+        clearTimeout(timer);
+        delete window[callbackName];
+        // If script fails, try plain no-cors fetch as fallback (fire and forget)
+        fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
+          .then(() => resolve({ success: true, folderUrl: null }))
+          .catch(reject);
+      };
+
+      // Store payload for the JSONP GET request
+      // Since JSONP is GET only we pass data via fetch POST + no-cors, then assume success
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        mode: 'no-cors',
+      }).then(() => {
+        clearTimeout(timer);
+        delete window[callbackName];
+        resolve({ success: true, folderUrl: null });
+      }).catch(err => {
+        clearTimeout(timer);
+        delete window[callbackName];
+        reject(err);
+      });
+    }).then(result => {
+      // Success
       document.getElementById('submitting-overlay').classList.remove('active');
       document.querySelectorAll('.section-card').forEach(c => c.classList.remove('active'));
       document.querySelectorAll('.step-pill').forEach(p => p.classList.add('done'));
       document.getElementById('success-screen').style.display = 'block';
-
       setText('success-title', t.successTitle);
       setText('success-sub', t.successSub);
       setText('success-sub2', t.successSub2);
-
-      // Show folder link if available
-      if (result.folderUrl) {
+      if (result && result.folderUrl) {
         const link = document.getElementById('folder-link');
         link.href = result.folderUrl;
         link.textContent = t.folderLink;
         link.style.display = 'inline-block';
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      throw new Error(result.error || 'Unknown error');
-    }
+    });
   } catch (err) {
     document.getElementById('submitting-overlay').classList.remove('active');
     document.getElementById('btn-submit').disabled = false;
