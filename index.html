@@ -1188,32 +1188,37 @@ let state = {
   nextId: parseInt(localStorage.getItem('yama_nextId') || '21'),
 };
 
+let _blockSync = false;
+
 function save() {
   localStorage.setItem('yama_log', JSON.stringify(state.log));
   localStorage.setItem('yama_nextId', state.nextId);
   localStorage.setItem('yama_batches', JSON.stringify(state.batches));
-  syncInventoryToSheets();
+  if (!_blockSync) syncInventoryToSheets();
 }
 
 async function fetchInventoryFromSheets() {
   const container = document.getElementById('itemsList');
   container.innerHTML = `<div class="empty-log" style="padding:2rem;text-align:center;color:var(--muted)">Loading inventory...</div>`;
+  _blockSync = true; // prevent any writes during load
   try {
     const res = await fetch(state.gsUrl + '?type=inventory');
     const data = await res.json();
     if (data && data.length > 0) {
       state.items = data;
       state.nextId = Math.max(...data.map(i => i.id), 20) + 1;
-      // Do NOT sync back — just read
+      // Read only — do NOT write back
     } else {
-      // Only push defaults if sheet is truly empty
+      // Sheet is empty — push defaults once
       state.items = DEFAULT_ITEMS;
+      _blockSync = false;
       syncInventoryToSheets();
     }
   } catch (e) {
     state.items = DEFAULT_ITEMS;
     console.warn('Could not fetch inventory from Sheets, using defaults:', e);
   }
+  _blockSync = false;
   renderItemsList();
 }
 
