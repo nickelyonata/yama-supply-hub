@@ -1492,7 +1492,7 @@ function renderAdminTable() {
   const maxStock = Math.max(...state.items.map(i => i.stock), 1);
 
   document.getElementById('adminTableBody').innerHTML = sorted.map(item => {
-    const pct = Math.round((item.stock / maxStock) * 100);
+    const pct = Math.min(100, Math.round((item.stock / 50) * 100));
     const statusClass = item.stock <= LOW_STOCK_THRESHOLD ? 'stock-low' : item.stock <= WARN_STOCK_THRESHOLD ? 'stock-warn' : 'stock-ok';
     const statusLabel = item.stock <= LOW_STOCK_THRESHOLD ? '⚠ Low' : item.stock <= WARN_STOCK_THRESHOLD ? '~ Watch' : '✓ OK';
     const barColor = item.stock <= LOW_STOCK_THRESHOLD ? 'var(--red)' : item.stock <= WARN_STOCK_THRESHOLD ? 'var(--accent)' : 'var(--green)';
