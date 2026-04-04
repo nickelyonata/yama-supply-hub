@@ -881,7 +881,6 @@
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="logo">
     <div class="logo-dot"></div>
@@ -892,7 +891,6 @@
   </div>
 </header>
 
-<!-- STAFF VIEW -->
 <div id="staffView" class="view active">
   <div class="staff-hero">
     <div class="step-label">Warehouse Request Form</div>
@@ -900,7 +898,6 @@
     <p class="subtitle">Fill in the form below. Stock will update automatically.</p>
   </div>
 
-  <!-- Step 1: Restaurant -->
   <div class="form-card" style="max-width:760px;margin:0 auto 1.5rem;padding:1.75rem 2rem;">
     <div class="form-section-title">Step 1 — Select Restaurant</div>
     <div class="restaurant-grid">
@@ -931,7 +928,6 @@
     </div>
   </div>
 
-  <!-- Items -->
   <div class="items-container">
     <div class="items-header">
       <span class="items-title">Step 3 — Select Items & Quantities</span>
@@ -940,13 +936,11 @@
     <div id="itemsList"></div>
   </div>
 
-  <!-- Submit -->
   <div class="submit-area" style="padding:0 0;max-width:760px;margin:0 auto 3rem;">
     <button class="submit-btn" onclick="submitRequest()">Submit Request</button>
   </div>
 </div>
 
-<!-- ADMIN VIEW -->
 <div id="adminView" class="view">
   <div class="admin-header">
     <div>
@@ -956,7 +950,6 @@
     <button class="logout-btn" onclick="logout()">Log Out</button>
   </div>
 
-  <!-- Google Sheets Config -->
   <div class="gs-config">
     <div class="gs-config-card">
       <div class="gs-dot" id="gsDot"></div>
@@ -965,17 +958,14 @@
     </div>
   </div>
 
-  <!-- Stats -->
   <div class="stats-row" id="statsRow"></div>
 
-  <!-- Tabs -->
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('inventory', this)">Inventory</button>
     <button class="tab-btn" onclick="switchTab('history', this)">Activity Log</button>
     <button class="tab-btn" onclick="switchTab('costs', this)">Cost Report</button>
   </div>
 
-  <!-- Inventory Tab -->
   <div id="tab-inventory" class="tab-content active">
     <div class="admin-table-wrap">
       <div class="admin-table-card">
@@ -1003,7 +993,6 @@
     </div>
   </div>
 
-  <!-- History Tab -->
   <div id="tab-history" class="tab-content">
     <div class="log-wrap">
       <div class="log-card">
@@ -1016,22 +1005,18 @@
     </div>
   </div>
 
-  <!-- Cost Report Tab -->
   <div id="tab-costs" class="tab-content">
     <div class="cost-summary-wrap">
 
-      <!-- Period selector -->
       <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
         <button class="period-btn active" onclick="setCostPeriod('week', this)">This Week</button>
         <button class="period-btn" onclick="setCostPeriod('month', this)">This Month</button>
         <button class="period-btn" onclick="setCostPeriod('all', this)">All Time</button>
       </div>
 
-      <!-- Per Restaurant -->
       <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Cost by Restaurant</div>
       <div id="restaurantCosts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem;margin-bottom:2rem;"></div>
 
-      <!-- Per Item breakdown -->
       <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Cost by Item</div>
       <div class="admin-table-card" style="margin-bottom:2rem;">
         <table>
@@ -1051,7 +1036,6 @@
   </div>
 </div>
 
-<!-- LOGIN MODAL -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
@@ -1066,7 +1050,6 @@
   </div>
 </div>
 
-<!-- RESTOCK MODAL -->
 <div class="modal-overlay" id="restockModal">
   <div class="modal restock-modal">
     <button class="modal-close" onclick="closeModal('restockModal')">✕</button>
@@ -1081,7 +1064,6 @@
   </div>
 </div>
 
-<!-- GS SETUP MODAL -->
 <div class="modal-overlay" id="gsModal">
   <div class="modal" style="width:500px">
     <button class="modal-close" onclick="closeModal('gsModal')">✕</button>
@@ -1100,7 +1082,6 @@
   </div>
 </div>
 
-<!-- NEW DELIVERY MODAL -->
 <div class="modal-overlay" id="deliveryModal">
   <div class="modal" style="width:min(600px,95vw)">
     <button class="modal-close" onclick="closeModal('deliveryModal')">✕</button>
@@ -1131,7 +1112,6 @@
       <input type="date" id="deliveryDate" />
     </div>
 
-    <!-- Batch queue preview -->
     <div id="batchPreview" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:0.8rem;">
       <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem">Current Batch Queue (FIFO)</div>
       <div id="batchList"></div>
@@ -1141,7 +1121,6 @@
   </div>
 </div>
 
-<!-- MISMATCH WARNING MODAL -->
 <div class="modal-overlay" id="mismatchModal">
   <div class="modal" style="width:460px">
     <div style="font-size:2rem;margin-bottom:0.75rem">⚠️</div>
@@ -1153,7 +1132,6 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1203,6 +1181,11 @@ function save() {
   localStorage.setItem('yama_nextId', state.nextId);
   localStorage.setItem('yama_batches', JSON.stringify(state.batches));
   // Never sync during load — only sync when explicitly called
+}
+
+function saveAndSync() {
+  save(); 
+  syncInventoryToSheets(); 
 }
 
 async function fetchInventoryFromSheets() {
@@ -1675,7 +1658,6 @@ function renderManageList() {
 
     return `
       <div style="border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;">
-        <!-- Item Header -->
         <div style="display:grid;grid-template-columns:1fr auto auto;gap:0.5rem;align-items:start;margin-bottom:0.75rem;">
           <div>
             <div style="font-weight:600;font-size:0.95rem;margin-bottom:4px" id="nameCell-${item.id}">${item.name}</div>
@@ -1689,7 +1671,6 @@ function renderManageList() {
           <button class="icon-btn delete" onclick="deleteItem(${item.id})" title="Delete item">✕</button>
         </div>
 
-        <!-- Batch Header -->
         <div style="display:grid;grid-template-columns:1fr 120px 120px auto;gap:0.5rem;padding:0 0.75rem;margin-bottom:0.3rem;">
           <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Batch</div>
           <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);text-align:center">Remaining Qty</div>
@@ -1697,7 +1678,6 @@ function renderManageList() {
           <div></div>
         </div>
 
-        <!-- Batch Rows -->
         <div id="batchRows-${item.id}">${batchRows}</div>
       </div>
     `;
