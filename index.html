@@ -1202,31 +1202,28 @@ function save() {
   localStorage.setItem('yama_log', JSON.stringify(state.log));
   localStorage.setItem('yama_nextId', state.nextId);
   localStorage.setItem('yama_batches', JSON.stringify(state.batches));
-  if (!_blockSync) syncInventoryToSheets();
+  // Never sync during load — only sync when explicitly called
 }
 
 async function fetchInventoryFromSheets() {
   const container = document.getElementById('itemsList');
   container.innerHTML = `<div class="empty-log" style="padding:2rem;text-align:center;color:var(--muted)">Loading inventory...</div>`;
-  _blockSync = true; // prevent any writes during load
   try {
     const res = await fetch(state.gsUrl + '?type=inventory');
     const data = await res.json();
     if (data && data.length > 0) {
       state.items = data;
       state.nextId = Math.max(...data.map(i => i.id), 20) + 1;
-      // Read only — do NOT write back
+      // READ ONLY — never write back on load
     } else {
-      // Sheet is empty — push defaults once
+      // Sheet is empty — push defaults once only
       state.items = DEFAULT_ITEMS;
-      _blockSync = false;
       syncInventoryToSheets();
     }
   } catch (e) {
     state.items = DEFAULT_ITEMS;
     console.warn('Could not fetch inventory from Sheets, using defaults:', e);
   }
-  _blockSync = false;
   renderItemsList();
 }
 
@@ -1385,9 +1382,6 @@ function submitRequest() {
     };
   });
 
-  // Sync updated inventory to Sheets
-  syncInventoryToSheets();
-
   // Log
   const logEntry = {
     id: Date.now(),
@@ -1398,7 +1392,7 @@ function submitRequest() {
     totalCost: itemsWithCost.reduce((sum, i) => sum + i.total, 0)
   };
   state.log.unshift(logEntry);
-  save();
+  saveAndSync();
 
   // Send to Google Sheets if configured
   if (state.gsUrl) sendToGoogleSheets(logEntry);
@@ -1595,7 +1589,7 @@ function renderLog() {
 function clearAllLogs() {
   if (!confirm('Clear ALL activity log entries? This will NOT restore stock.')) return;
   state.log = [];
-  save();
+  saveAndSync();
   renderLog();
   renderStats();
   showToast('✓ Activity log cleared');
@@ -1613,7 +1607,7 @@ function deleteLogEntry(id) {
   });
 
   state.log = state.log.filter(l => l.id !== id);
-  save();
+  saveAndSync();
   renderLog();
   renderAdminTable();
   renderStats();
@@ -1725,7 +1719,7 @@ function setOpeningStock(itemId) {
   const item = state.items.find(i => i.id === itemId);
   if (item) { item.stock = qty; item.cost = price; }
 
-  save();
+  saveAndSync();
   renderAdminTable();
   renderManageList();
   showToast(`✓ Opening stock set for ${item?.name}`);
@@ -1757,7 +1751,7 @@ function deleteBatch(itemId, batchIndex) {
   state.batches[itemId] = batches;
   const item = state.items.find(i => i.id === itemId);
   if (item) item.stock = Math.max(0, item.stock - removed);
-  save();
+  saveAndSync();
   renderAdminTable();
   renderManageList();
   showToast('✓ Batch removed');
@@ -1770,7 +1764,7 @@ function applyRestock() {
     const item = state.items.find(i => i.id === id);
     if (item) item.invoiceName = input.value.trim();
   });
-  save();
+  saveAndSync();
   renderAdminTable();
   renderStats();
   closeModal('restockModal');
@@ -1793,7 +1787,7 @@ function saveRename(id, input) {
   const newName = input.value.trim();
   const item = state.items.find(i => i.id === id);
   if (!item) return;
-  if (newName) { item.name = newName; save(); renderItemsList(); }
+  if (newName) { item.name = newName; saveAndSync(); renderItemsList(); }
   const cell = document.getElementById(`nameCell-${id}`);
   if (cell) cell.innerHTML = `<div style="font-weight:600;font-size:0.95rem">${item.name}</div>`;
 }
@@ -1804,7 +1798,7 @@ function deleteItem(id) {
   if (!confirm(`Delete "${item.name}"? This cannot be undone.`)) return;
   state.items = state.items.filter(i => i.id !== id);
   delete state.batches[id];
-  save();
+  saveAndSync();
   renderItemsList();
   renderManageList();
   showToast(`"${item.name}" deleted`);
@@ -1816,7 +1810,7 @@ function addNewItem() {
   if (!name) return;
   const newItem = { id: state.nextId++, name, invoiceName: '', category: 'General', stock: 0, cost: 0 };
   state.items.push(newItem);
-  save();
+  saveAndSync();
   nameInput.value = '';
   renderManageList();
   showToast(`✓ "${name}" added`);
@@ -1900,7 +1894,7 @@ function connectGoogleSheets() {
   const url = document.getElementById('gsUrlInput').value.trim();
   if (!url.startsWith('https://')) { showToast('Enter a valid URL', true); return; }
   state.gsUrl = url;
-  save();
+  saveAndSync();
   document.getElementById('gsDot').classList.add('connected');
   document.getElementById('gsStatus').innerHTML = `<strong>Google Sheets connected</strong> — data syncs on every submission.`;
   closeModal('gsModal');
@@ -2032,7 +2026,7 @@ function addDelivery() {
   const item = state.items.find(i => i.id === itemId);
   if (item) { item.stock += qty; item.cost = price; }
 
-  save();
+  saveAndSync();
   renderAdminTable();
   renderStats();
   showBatchPreview(itemId);
