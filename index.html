@@ -547,6 +547,8 @@
     max-width: 1000px;
     margin: 0 auto 3rem;
     padding: 0 2rem;
+    position: relative; /* Add position relative here */
+    z-index: 10;        /* Ensure logs stay above noise */
   }
 
   .log-card {
@@ -554,6 +556,8 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     overflow: hidden;
+    position: relative; /* Ensure card content isn't covered */
+    z-index: 11;
   }
 
   .log-header {
@@ -1630,11 +1634,11 @@ function renderManageList() {
             <span style="margin-left:0.5rem;font-size:0.7rem">${b.date}</span>
           </div>
           <input type="number" min="0" value="${b.remaining}"
-            onchange="updateBatchQty(${item.id}, ${bi}, this.value)"
+            oninput="updateBatchQty(${item.id}, ${bi}, this.value)"
             style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.3rem 0.5rem;color:var(--text);font-size:0.8rem;width:100%;text-align:center"
             title="Remaining qty" placeholder="qty" />
           <input type="number" min="0" step="0.01" value="${b.price}"
-            onchange="updateBatchPrice(${item.id}, ${bi}, this.value)"
+            oninput="updateBatchPrice(${item.id}, ${bi}, this.value)"
             style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.3rem 0.5rem;color:var(--accent);font-size:0.8rem;width:100%;text-align:center"
             title="Price per box" placeholder="$price" />
           <button onclick="deleteBatch(${item.id}, ${bi})" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:5px;padding:0.3rem 0.5rem;cursor:pointer;font-size:0.75rem;" title="Remove batch">✕</button>
@@ -1738,12 +1742,32 @@ function deleteBatch(itemId, batchIndex) {
 }
 
 function applyRestock() {
-  // Save invoice names
+  // 1. Auto-apply any pending opening stock inputs that missed the "Set" button
+  state.items.forEach(item => {
+    const qtyInput = document.getElementById(`openQty-${item.id}`);
+    const priceInput = document.getElementById(`openPrice-${item.id}`);
+    if (qtyInput && qtyInput.value !== '') {
+      const qty = parseInt(qtyInput.value) || 0;
+      const price = parseFloat(priceInput?.value) || 0;
+      if (qty > 0) {
+        const today = new Date().toISOString().split('T')[0];
+        if (!state.batches[item.id]) state.batches[item.id] = [];
+        state.batches[item.id].push({ qty, remaining: qty, price, date: today });
+        item.stock = qty; 
+        item.cost = price;
+        // Clear the input so it doesn't double-trigger later
+        qtyInput.value = ''; 
+      }
+    }
+  });
+
+  // 2. Save invoice names
   document.querySelectorAll('[data-invoice-id]').forEach(input => {
     const id = parseInt(input.dataset.invoiceId);
     const item = state.items.find(i => i.id === id);
     if (item) item.invoiceName = input.value.trim();
   });
+  
   saveAndSync();
   renderAdminTable();
   renderStats();
