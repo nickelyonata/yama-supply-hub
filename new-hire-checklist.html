@@ -856,24 +856,46 @@ async function processW4() {
   if (!w4Input.files.length || !sigs.B.hasData) return null;
 
   const pdfBytes = await w4Input.files[0].arrayBuffer();
-  // Using native transparent PNG logic
   const sigImageURI = sigs.B.canvas.toDataURL('image/png'); 
 
   const { PDFDocument } = PDFLib;
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const sigImage = await pdfDoc.embedPng(sigImageURI);
 
-  // Flatten the form fields so the text cannot be edited later
   try { pdfDoc.getForm().flatten(); } catch(e) {}
 
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   
-  // Stamping exactly on the W-4 signature line
-  firstPage.drawImage(sigImage, { x: 160, y: 80, width: 200, height: 40 });
+  // SHIFTED RIGHT AND UP: Sits cleanly on the Step 5 line
+  firstPage.drawImage(sigImage, { x: 140, y: 80, width: 180, height: 35 });
 
   const modifiedPdfBytes = await pdfDoc.save();
   return bytesToBase64(modifiedPdfBytes); 
+}
+
+async function processI9() {
+  const i9Input = document.getElementById('i9-file');
+  if (!i9Input.files.length || !sigs.C.hasData) return null;
+
+  const pdfBytes = await i9Input.files[0].arrayBuffer();
+  const sigImageURI = sigs.C.canvas.toDataURL('image/png');
+
+  const { PDFDocument } = PDFLib;
+  const pdfDoc = await PDFDocument.load(pdfBytes);
+  const sigImage = await pdfDoc.embedPng(sigImageURI);
+
+  try { pdfDoc.getForm().flatten(); } catch(e) {}
+
+  const pages = pdfDoc.getPages();
+  const firstPage = pages[0];
+  
+  // SHIFTED RIGHT AND UP: Pulled out of the Preparer box below
+  firstPage.drawImage(sigImage, { x: 80, y: 425, width: 200, height: 40 });
+
+  const modifiedPdfBytes = await pdfDoc.save();
+  return bytesToBase64(modifiedPdfBytes); 
+}
 }
 
 async function processI9() {
