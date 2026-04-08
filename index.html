@@ -162,15 +162,12 @@
 
   .form-section-title {
     font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--text);
+    color: var(--muted);
     margin-bottom: 1rem;
-    padding-bottom: 0.4rem;
-    border-bottom: 2px solid var(--accent);
-    display: inline-block;
   }
 
   /* RESTAURANT SELECTOR */
@@ -269,13 +266,8 @@
 
   .items-title {
     font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.1rem;
-    color: var(--text);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding-bottom: 0.4rem;
-    border-bottom: 2px solid var(--accent);
+    font-weight: 700;
+    font-size: 0.95rem;
   }
 
   .search-input {
@@ -547,8 +539,6 @@
     max-width: 1000px;
     margin: 0 auto 3rem;
     padding: 0 2rem;
-    position: relative; /* Add position relative here */
-    z-index: 10;        /* Ensure logs stay above noise */
   }
 
   .log-card {
@@ -556,8 +546,6 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     overflow: hidden;
-    position: relative; /* Ensure card content isn't covered */
-    z-index: 11;
   }
 
   .log-header {
@@ -885,6 +873,7 @@
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
   <div class="logo">
     <div class="logo-dot"></div>
@@ -895,6 +884,7 @@
   </div>
 </header>
 
+<!-- STAFF VIEW -->
 <div id="staffView" class="view active">
   <div class="staff-hero">
     <div class="step-label">Warehouse Request Form</div>
@@ -902,6 +892,7 @@
     <p class="subtitle">Fill in the form below. Stock will update automatically.</p>
   </div>
 
+  <!-- Step 1: Restaurant -->
   <div class="form-card" style="max-width:760px;margin:0 auto 1.5rem;padding:1.75rem 2rem;">
     <div class="form-section-title">Step 1 — Select Restaurant</div>
     <div class="restaurant-grid">
@@ -932,6 +923,7 @@
     </div>
   </div>
 
+  <!-- Items -->
   <div class="items-container">
     <div class="items-header">
       <span class="items-title">Step 3 — Select Items & Quantities</span>
@@ -940,11 +932,13 @@
     <div id="itemsList"></div>
   </div>
 
+  <!-- Submit -->
   <div class="submit-area" style="padding:0 0;max-width:760px;margin:0 auto 3rem;">
     <button class="submit-btn" onclick="submitRequest()">Submit Request</button>
   </div>
 </div>
 
+<!-- ADMIN VIEW -->
 <div id="adminView" class="view">
   <div class="admin-header">
     <div>
@@ -954,6 +948,7 @@
     <button class="logout-btn" onclick="logout()">Log Out</button>
   </div>
 
+  <!-- Google Sheets Config -->
   <div class="gs-config">
     <div class="gs-config-card">
       <div class="gs-dot" id="gsDot"></div>
@@ -962,14 +957,17 @@
     </div>
   </div>
 
+  <!-- Stats -->
   <div class="stats-row" id="statsRow"></div>
 
+  <!-- Tabs -->
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('inventory', this)">Inventory</button>
     <button class="tab-btn" onclick="switchTab('history', this)">Activity Log</button>
     <button class="tab-btn" onclick="switchTab('costs', this)">Cost Report</button>
   </div>
 
+  <!-- Inventory Tab -->
   <div id="tab-inventory" class="tab-content active">
     <div class="admin-table-wrap">
       <div class="admin-table-card">
@@ -997,6 +995,7 @@
     </div>
   </div>
 
+  <!-- History Tab -->
   <div id="tab-history" class="tab-content">
     <div class="log-wrap">
       <div class="log-card">
@@ -1009,18 +1008,22 @@
     </div>
   </div>
 
+  <!-- Cost Report Tab -->
   <div id="tab-costs" class="tab-content">
     <div class="cost-summary-wrap">
 
+      <!-- Period selector -->
       <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
         <button class="period-btn active" onclick="setCostPeriod('week', this)">This Week</button>
         <button class="period-btn" onclick="setCostPeriod('month', this)">This Month</button>
         <button class="period-btn" onclick="setCostPeriod('all', this)">All Time</button>
       </div>
 
+      <!-- Per Restaurant -->
       <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Cost by Restaurant</div>
       <div id="restaurantCosts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem;margin-bottom:2rem;"></div>
 
+      <!-- Per Item breakdown -->
       <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Cost by Item</div>
       <div class="admin-table-card" style="margin-bottom:2rem;">
         <table>
@@ -1040,6 +1043,7 @@
   </div>
 </div>
 
+<!-- LOGIN MODAL -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
@@ -1054,6 +1058,7 @@
   </div>
 </div>
 
+<!-- RESTOCK MODAL -->
 <div class="modal-overlay" id="restockModal">
   <div class="modal restock-modal">
     <button class="modal-close" onclick="closeModal('restockModal')">✕</button>
@@ -1068,6 +1073,7 @@
   </div>
 </div>
 
+<!-- GS SETUP MODAL -->
 <div class="modal-overlay" id="gsModal">
   <div class="modal" style="width:500px">
     <button class="modal-close" onclick="closeModal('gsModal')">✕</button>
@@ -1086,6 +1092,7 @@
   </div>
 </div>
 
+<!-- NEW DELIVERY MODAL -->
 <div class="modal-overlay" id="deliveryModal">
   <div class="modal" style="width:min(600px,95vw)">
     <button class="modal-close" onclick="closeModal('deliveryModal')">✕</button>
@@ -1116,6 +1123,7 @@
       <input type="date" id="deliveryDate" />
     </div>
 
+    <!-- Batch queue preview -->
     <div id="batchPreview" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:0.8rem;">
       <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem">Current Batch Queue (FIFO)</div>
       <div id="batchList"></div>
@@ -1125,6 +1133,7 @@
   </div>
 </div>
 
+<!-- MISMATCH WARNING MODAL -->
 <div class="modal-overlay" id="mismatchModal">
   <div class="modal" style="width:460px">
     <div style="font-size:2rem;margin-bottom:0.75rem">⚠️</div>
@@ -1136,6 +1145,7 @@
   </div>
 </div>
 
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1184,33 +1194,38 @@ function save() {
   localStorage.setItem('yama_log', JSON.stringify(state.log));
   localStorage.setItem('yama_nextId', state.nextId);
   localStorage.setItem('yama_batches', JSON.stringify(state.batches));
-  // Never sync during load — only sync when explicitly called
-}
-
-function saveAndSync() {
-  save(); 
-  syncInventoryToSheets(); 
+  if (!_blockSync) syncInventoryToSheets();
 }
 
 async function fetchInventoryFromSheets() {
   const container = document.getElementById('itemsList');
   container.innerHTML = `<div class="empty-log" style="padding:2rem;text-align:center;color:var(--muted)">Loading inventory...</div>`;
+  _blockSync = true; // prevent any writes during load
   try {
-    const res = await fetch(state.gsUrl + '?type=inventory');
+    const res = await fetch(state.gsUrl + '?type=inventory&t=' + Date.now()); // cache-bust
     const data = await res.json();
-    if (data && data.length > 0) {
-      state.items = data;
-      state.nextId = Math.max(...data.map(i => i.id), 20) + 1;
-      // READ ONLY — never write back on load
+    if (data && Array.isArray(data) && data.length > 0) {
+      // Deduplicate by ID — keeps only the first occurrence of each item ID
+      const seen = new Set();
+      state.items = data.filter(item => {
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      });
+      state.nextId = Math.max(...state.items.map(i => i.id), 20) + 1;
+      // Read only — do NOT write back on load
     } else {
-      // Sheet is empty — push defaults once only
-      state.items = DEFAULT_ITEMS;
+      // Sheet is empty — push defaults once
+      state.items = [...DEFAULT_ITEMS];
+      _blockSync = false;
       syncInventoryToSheets();
+      _blockSync = true; // re-block until we're done
     }
   } catch (e) {
-    state.items = DEFAULT_ITEMS;
+    state.items = [...DEFAULT_ITEMS];
     console.warn('Could not fetch inventory from Sheets, using defaults:', e);
   }
+  _blockSync = false;
   renderItemsList();
 }
 
@@ -1220,7 +1235,7 @@ async function syncInventoryToSheets() {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'inventory', items: state.items })
+      body: JSON.stringify({ type: 'inventory', replace: true, items: state.items })
     });
   } catch (e) {
     console.warn('Inventory sync failed:', e);
@@ -1369,6 +1384,9 @@ function submitRequest() {
     };
   });
 
+  // Sync updated inventory to Sheets
+  syncInventoryToSheets();
+
   // Log
   const logEntry = {
     id: Date.now(),
@@ -1379,7 +1397,7 @@ function submitRequest() {
     totalCost: itemsWithCost.reduce((sum, i) => sum + i.total, 0)
   };
   state.log.unshift(logEntry);
-  saveAndSync();
+  save();
 
   // Send to Google Sheets if configured
   if (state.gsUrl) sendToGoogleSheets(logEntry);
@@ -1481,7 +1499,7 @@ function renderAdminTable() {
   const maxStock = Math.max(...state.items.map(i => i.stock), 1);
 
   document.getElementById('adminTableBody').innerHTML = sorted.map(item => {
-    const pct = Math.min(100, Math.round((item.stock / 50) * 100));
+    const pct = Math.round((item.stock / maxStock) * 100);
     const statusClass = item.stock <= LOW_STOCK_THRESHOLD ? 'stock-low' : item.stock <= WARN_STOCK_THRESHOLD ? 'stock-warn' : 'stock-ok';
     const statusLabel = item.stock <= LOW_STOCK_THRESHOLD ? '⚠ Low' : item.stock <= WARN_STOCK_THRESHOLD ? '~ Watch' : '✓ OK';
     const barColor = item.stock <= LOW_STOCK_THRESHOLD ? 'var(--red)' : item.stock <= WARN_STOCK_THRESHOLD ? 'var(--accent)' : 'var(--green)';
@@ -1576,7 +1594,7 @@ function renderLog() {
 function clearAllLogs() {
   if (!confirm('Clear ALL activity log entries? This will NOT restore stock.')) return;
   state.log = [];
-  saveAndSync();
+  save();
   renderLog();
   renderStats();
   showToast('✓ Activity log cleared');
@@ -1594,7 +1612,7 @@ function deleteLogEntry(id) {
   });
 
   state.log = state.log.filter(l => l.id !== id);
-  saveAndSync();
+  save();
   renderLog();
   renderAdminTable();
   renderStats();
@@ -1634,11 +1652,11 @@ function renderManageList() {
             <span style="margin-left:0.5rem;font-size:0.7rem">${b.date}</span>
           </div>
           <input type="number" min="0" value="${b.remaining}"
-            oninput="updateBatchQty(${item.id}, ${bi}, this.value)"
+            onchange="updateBatchQty(${item.id}, ${bi}, this.value)"
             style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.3rem 0.5rem;color:var(--text);font-size:0.8rem;width:100%;text-align:center"
             title="Remaining qty" placeholder="qty" />
           <input type="number" min="0" step="0.01" value="${b.price}"
-            oninput="updateBatchPrice(${item.id}, ${bi}, this.value)"
+            onchange="updateBatchPrice(${item.id}, ${bi}, this.value)"
             style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0.3rem 0.5rem;color:var(--accent);font-size:0.8rem;width:100%;text-align:center"
             title="Price per box" placeholder="$price" />
           <button onclick="deleteBatch(${item.id}, ${bi})" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:5px;padding:0.3rem 0.5rem;cursor:pointer;font-size:0.75rem;" title="Remove batch">✕</button>
@@ -1662,6 +1680,7 @@ function renderManageList() {
 
     return `
       <div style="border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;">
+        <!-- Item Header -->
         <div style="display:grid;grid-template-columns:1fr auto auto;gap:0.5rem;align-items:start;margin-bottom:0.75rem;">
           <div>
             <div style="font-weight:600;font-size:0.95rem;margin-bottom:4px" id="nameCell-${item.id}">${item.name}</div>
@@ -1675,6 +1694,7 @@ function renderManageList() {
           <button class="icon-btn delete" onclick="deleteItem(${item.id})" title="Delete item">✕</button>
         </div>
 
+        <!-- Batch Header -->
         <div style="display:grid;grid-template-columns:1fr 120px 120px auto;gap:0.5rem;padding:0 0.75rem;margin-bottom:0.3rem;">
           <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Batch</div>
           <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);text-align:center">Remaining Qty</div>
@@ -1682,6 +1702,7 @@ function renderManageList() {
           <div></div>
         </div>
 
+        <!-- Batch Rows -->
         <div id="batchRows-${item.id}">${batchRows}</div>
       </div>
     `;
@@ -1703,7 +1724,7 @@ function setOpeningStock(itemId) {
   const item = state.items.find(i => i.id === itemId);
   if (item) { item.stock = qty; item.cost = price; }
 
-  saveAndSync();
+  save();
   renderAdminTable();
   renderManageList();
   showToast(`✓ Opening stock set for ${item?.name}`);
@@ -1735,40 +1756,20 @@ function deleteBatch(itemId, batchIndex) {
   state.batches[itemId] = batches;
   const item = state.items.find(i => i.id === itemId);
   if (item) item.stock = Math.max(0, item.stock - removed);
-  saveAndSync();
+  save();
   renderAdminTable();
   renderManageList();
   showToast('✓ Batch removed');
 }
 
 function applyRestock() {
-  // 1. Auto-apply any pending opening stock inputs that missed the "Set" button
-  state.items.forEach(item => {
-    const qtyInput = document.getElementById(`openQty-${item.id}`);
-    const priceInput = document.getElementById(`openPrice-${item.id}`);
-    if (qtyInput && qtyInput.value !== '') {
-      const qty = parseInt(qtyInput.value) || 0;
-      const price = parseFloat(priceInput?.value) || 0;
-      if (qty > 0) {
-        const today = new Date().toISOString().split('T')[0];
-        if (!state.batches[item.id]) state.batches[item.id] = [];
-        state.batches[item.id].push({ qty, remaining: qty, price, date: today });
-        item.stock = qty; 
-        item.cost = price;
-        // Clear the input so it doesn't double-trigger later
-        qtyInput.value = ''; 
-      }
-    }
-  });
-
-  // 2. Save invoice names
+  // Save invoice names
   document.querySelectorAll('[data-invoice-id]').forEach(input => {
     const id = parseInt(input.dataset.invoiceId);
     const item = state.items.find(i => i.id === id);
     if (item) item.invoiceName = input.value.trim();
   });
-  
-  saveAndSync();
+  save();
   renderAdminTable();
   renderStats();
   closeModal('restockModal');
@@ -1791,7 +1792,7 @@ function saveRename(id, input) {
   const newName = input.value.trim();
   const item = state.items.find(i => i.id === id);
   if (!item) return;
-  if (newName) { item.name = newName; saveAndSync(); renderItemsList(); }
+  if (newName) { item.name = newName; save(); renderItemsList(); }
   const cell = document.getElementById(`nameCell-${id}`);
   if (cell) cell.innerHTML = `<div style="font-weight:600;font-size:0.95rem">${item.name}</div>`;
 }
@@ -1802,7 +1803,7 @@ function deleteItem(id) {
   if (!confirm(`Delete "${item.name}"? This cannot be undone.`)) return;
   state.items = state.items.filter(i => i.id !== id);
   delete state.batches[id];
-  saveAndSync();
+  save();
   renderItemsList();
   renderManageList();
   showToast(`"${item.name}" deleted`);
@@ -1814,7 +1815,7 @@ function addNewItem() {
   if (!name) return;
   const newItem = { id: state.nextId++, name, invoiceName: '', category: 'General', stock: 0, cost: 0 };
   state.items.push(newItem);
-  saveAndSync();
+  save();
   nameInput.value = '';
   renderManageList();
   showToast(`✓ "${name}" added`);
@@ -1898,7 +1899,7 @@ function connectGoogleSheets() {
   const url = document.getElementById('gsUrlInput').value.trim();
   if (!url.startsWith('https://')) { showToast('Enter a valid URL', true); return; }
   state.gsUrl = url;
-  saveAndSync();
+  save();
   document.getElementById('gsDot').classList.add('connected');
   document.getElementById('gsStatus').innerHTML = `<strong>Google Sheets connected</strong> — data syncs on every submission.`;
   closeModal('gsModal');
@@ -2030,7 +2031,7 @@ function addDelivery() {
   const item = state.items.find(i => i.id === itemId);
   if (item) { item.stock += qty; item.cost = price; }
 
-  saveAndSync();
+  save();
   renderAdminTable();
   renderStats();
   showBatchPreview(itemId);
