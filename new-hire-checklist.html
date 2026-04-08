@@ -354,6 +354,7 @@
       </div>
     </div>
 
+
     <div class="section-card" id="section-1">
       <div class="section-header">
         <div class="section-icon">📋</div>
@@ -526,7 +527,7 @@
 
 <script>
 // ══════════════════════════════════════════════════════════════
-//  APPS SCRIPT WEB APP URL (ALREADY EMBEDDED)
+//  APPS SCRIPT WEB APP URL
 // ══════════════════════════════════════════════════════════════
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwgazKezi6ceeyMWu-SD6a6W6cpbPW-MAM5GQDZyYKqQ98IO-fqrRkAGh5Gpnwz8s3tPw/exec';
 
@@ -757,7 +758,6 @@ function fileToBase64(file) {
   });
 }
 
-// Helper: Safely converts raw bytes to a Base64 string for Apps Script
 function bytesToBase64(bytes) {
   let binary = '';
   const len = bytes.byteLength;
@@ -892,32 +892,6 @@ async function processI9() {
   
   // SHIFTED RIGHT AND UP: Pulled out of the Preparer box below
   firstPage.drawImage(sigImage, { x: 80, y: 425, width: 200, height: 40 });
-
-  const modifiedPdfBytes = await pdfDoc.save();
-  return bytesToBase64(modifiedPdfBytes); 
-}
-}
-
-async function processI9() {
-  const i9Input = document.getElementById('i9-file');
-  if (!i9Input.files.length || !sigs.C.hasData) return null;
-
-  const pdfBytes = await i9Input.files[0].arrayBuffer();
-  // Using native transparent PNG logic
-  const sigImageURI = sigs.C.canvas.toDataURL('image/png');
-
-  const { PDFDocument } = PDFLib;
-  const pdfDoc = await PDFDocument.load(pdfBytes);
-  const sigImage = await pdfDoc.embedPng(sigImageURI);
-
-  // Flatten the form fields so the text cannot be edited later
-  try { pdfDoc.getForm().flatten(); } catch(e) {}
-
-  const pages = pdfDoc.getPages();
-  const firstPage = pages[0];
-  
-  // Stamping exactly on the I-9 Section 1 signature line
-  firstPage.drawImage(sigImage, { x: 80, y: 400, width: 220, height: 45 });
 
   const modifiedPdfBytes = await pdfDoc.save();
   return bytesToBase64(modifiedPdfBytes); 
