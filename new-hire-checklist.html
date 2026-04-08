@@ -598,7 +598,7 @@ const T = {
     w4Download: 'Descargar PDF', lblW4Upload: 'Subir W-4 Completado',
     uploadW4Label: 'Subir su W-4 lleno', uploadW4Sub: 'Solo PDF',
     titleC: 'C. I-9 — Verificación de Elegibilidad', subC: 'Descargue, complete la Sección 1, suba y firme abajo',
-    i9Note: 'El I-9 verifica su identidad y autorización para trabajar en EE.UU. Descargue, complete la Sección 1, suba el archivo y firme en el panel digital.',
+    i9Note: 'El I-9 verifica su identidad y authorization para trabajar en EE.UU. Descargue, complete la Sección 1, suba el archivo y firme en el panel digital.',
     i9PdfTitle: 'Formulario USCIS I-9 (2023)', i9PdfSub: 'Verificación de Elegibilidad — uscis.gov',
     i9Download: 'Descargar PDF', lblI9Upload: 'Subir I-9 Lleno',
     uploadI9Label: 'Subir su I-9 lleno', uploadI9Sub: 'Solo PDF',
@@ -868,7 +868,7 @@ async function processW4() {
   const firstPage = pages[0];
   
   // SHIFTED RIGHT AND UP: Sits cleanly on the Step 5 line
-  firstPage.drawImage(sigImage, { x: 140, y: 80, width: 180, height: 35 });
+  firstPage.drawImage(sigImage, { x: 140, y: 90, width: 180, height: 35 });
 
   const modifiedPdfBytes = await pdfDoc.save();
   return bytesToBase64(modifiedPdfBytes); 
@@ -890,8 +890,8 @@ async function processI9() {
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   
-  // DROPPED DOWN TO THE LINE AND PUSHED RIGHT TO CLEAR TEXT
-  firstPage.drawImage(sigImage, { x: 140, y: 410, width: 180, height: 35 });
+  // SHIFTED RIGHT AND UP: Pulled out of the Preparer box below
+  firstPage.drawImage(sigImage, { x: 140, y: 420, width: 180, height: 35 });
 
   const modifiedPdfBytes = await pdfDoc.save();
   return bytesToBase64(modifiedPdfBytes); 
@@ -986,7 +986,9 @@ async function submitForm() {
     };
 
     await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('Timed out')), 60000);
+      // THE FIX: Increased timeout to 3 minutes (180000ms) to allow heavy files to upload
+      const timer = setTimeout(() => reject(new Error('Timed out')), 180000); 
+      
       const iframe = document.createElement('iframe');
       iframe.name = 'gs_iframe_' + Date.now();
       iframe.style.display = 'none';
