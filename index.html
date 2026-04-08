@@ -2031,7 +2031,12 @@ function addDelivery() {
   const item = state.items.find(i => i.id === itemId);
   if (item) { item.stock += qty; item.cost = price; }
 
-  save();
+  // Save locals then force explicit inventory sync so cost persists to Sheets
+  localStorage.setItem('yama_batches', JSON.stringify(state.batches));
+  localStorage.setItem('yama_nextId', String(state.nextId));
+  localStorage.setItem('yama_log', JSON.stringify(state.log));
+  syncInventoryToSheets();
+
   renderAdminTable();
   renderStats();
   showBatchPreview(itemId);
