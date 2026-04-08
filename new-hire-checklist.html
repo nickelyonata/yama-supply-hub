@@ -890,8 +890,8 @@ async function processI9() {
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   
-  // SHIFTED RIGHT AND UP: Pulled out of the Preparer box below
-  firstPage.drawImage(sigImage, { x: 80, y: 425, width: 200, height: 40 });
+  // DROPPED DOWN TO THE LINE AND PUSHED RIGHT TO CLEAR TEXT
+  firstPage.drawImage(sigImage, { x: 140, y: 410, width: 180, height: 35 });
 
   const modifiedPdfBytes = await pdfDoc.save();
   return bytesToBase64(modifiedPdfBytes); 
