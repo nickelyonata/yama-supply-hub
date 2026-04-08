@@ -354,7 +354,6 @@
       </div>
     </div>
 
-
     <div class="section-card" id="section-1">
       <div class="section-header">
         <div class="section-icon">📋</div>
@@ -527,7 +526,7 @@
 
 <script>
 // ══════════════════════════════════════════════════════════════
-//  APPS SCRIPT WEB APP URL
+//  APPS SCRIPT WEB APP URL (ALREADY EMBEDDED)
 // ══════════════════════════════════════════════════════════════
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwgazKezi6ceeyMWu-SD6a6W6cpbPW-MAM5GQDZyYKqQ98IO-fqrRkAGh5Gpnwz8s3tPw/exec';
 
@@ -850,14 +849,14 @@ function validateStep(step) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  PDF AUTO-STAMPERS
+//  PDF AUTO-STAMPERS (TRUE TRANSPARENT PNGs)
 // ══════════════════════════════════════════════════════════════
 async function processW4() {
   const w4Input = document.getElementById('w4-file');
   if (!w4Input.files.length || !sigs.B.hasData) return null;
 
   const pdfBytes = await w4Input.files[0].arrayBuffer();
-  // We use standard transparent PNG here
+  // Using native transparent PNG logic
   const sigImageURI = sigs.B.canvas.toDataURL('image/png'); 
 
   const { PDFDocument } = PDFLib;
@@ -870,7 +869,7 @@ async function processW4() {
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   
-  // Coordinate Drop applied here for Step 5
+  // Stamping exactly on the W-4 signature line
   firstPage.drawImage(sigImage, { x: 90, y: 65, width: 180, height: 35 });
 
   const modifiedPdfBytes = await pdfDoc.save();
@@ -882,7 +881,7 @@ async function processI9() {
   if (!i9Input.files.length || !sigs.C.hasData) return null;
 
   const pdfBytes = await i9Input.files[0].arrayBuffer();
-  // We use standard transparent PNG here
+  // Using native transparent PNG logic
   const sigImageURI = sigs.C.canvas.toDataURL('image/png');
 
   const { PDFDocument } = PDFLib;
@@ -895,6 +894,7 @@ async function processI9() {
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   
+  // Stamping exactly on the I-9 Section 1 signature line
   firstPage.drawImage(sigImage, { x: 60, y: 400, width: 220, height: 45 });
 
   const modifiedPdfBytes = await pdfDoc.save();
@@ -1095,7 +1095,7 @@ window.addEventListener('resize', () => {
     if (sigs[id] && sigs[id].canvas) {
       const hadData = sigs[id].hasData;
       resizeCanvas(id);
-      if(hadData) { clearSig(id); } // Clears signature if screen is rotated to prevent desync
+      if(hadData) { clearSig(id); } 
     }
   });
 });
