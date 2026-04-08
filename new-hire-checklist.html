@@ -758,6 +758,14 @@ function fileToBase64(file) {
   });
 }
 
+// Helper: Safely converts raw bytes to a Base64 string for Apps Script
+function bytesToBase64(bytes) {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) { binary += String.fromCharCode(bytes[i]); }
+  return window.btoa(binary);
+}
+
 // ══════════════════════════════════════════════════════════════
 //  FORM EVENTS
 // ══════════════════════════════════════════════════════════════
@@ -844,45 +852,26 @@ function validateStep(step) {
 // ══════════════════════════════════════════════════════════════
 //  PDF AUTO-STAMPERS
 // ══════════════════════════════════════════════════════════════
-
-// Helper: Converts transparent canvas to a solid white PNG for reliable PDF rendering
-function getSolidSignature(canvas) {
-  const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
-  const ctx = tempCanvas.getContext('2d');
-  ctx.fillStyle = '#ffffff'; 
-  ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-  ctx.drawImage(canvas, 0, 0);
-  return tempCanvas.toDataURL('image/png');
-}
-
-// Helper: Safely converts raw bytes to a Base64 string for Apps Script
-function bytesToBase64(bytes) {
-  let binary = '';
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) { binary += String.fromCharCode(bytes[i]); }
-  return window.btoa(binary);
-}
-
 async function processW4() {
   const w4Input = document.getElementById('w4-file');
   if (!w4Input.files.length || !sigs.B.hasData) return null;
 
   const pdfBytes = await w4Input.files[0].arrayBuffer();
-  const sigImageURI = getSolidSignature(sigs.B.canvas); // Use solid white background
+  // We use standard transparent PNG here
+  const sigImageURI = sigs.B.canvas.toDataURL('image/png'); 
 
   const { PDFDocument } = PDFLib;
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const sigImage = await pdfDoc.embedPng(sigImageURI);
 
   // Flatten the form fields so the text cannot be edited later
-  try { pdfDoc.getForm().flatten(); } catch(e) { console.log("No fields to flatten"); }
+  try { pdfDoc.getForm().flatten(); } catch(e) {}
 
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   
-  // Snapped to W-4 Step 5 Signature Line
-  firstPage.drawImage(sigImage, { x: 120, y: 110, width: 220, height: 45 });
+  // Coordinate Drop applied here for Step 5
+  firstPage.drawImage(sigImage, { x: 90, y: 65, width: 180, height: 35 });
 
   const modifiedPdfBytes = await pdfDoc.save();
   return bytesToBase64(modifiedPdfBytes); 
@@ -893,19 +882,19 @@ async function processI9() {
   if (!i9Input.files.length || !sigs.C.hasData) return null;
 
   const pdfBytes = await i9Input.files[0].arrayBuffer();
-  const sigImageURI = getSolidSignature(sigs.C.canvas); // Use solid white background
+  // We use standard transparent PNG here
+  const sigImageURI = sigs.C.canvas.toDataURL('image/png');
 
   const { PDFDocument } = PDFLib;
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const sigImage = await pdfDoc.embedPng(sigImageURI);
 
   // Flatten the form fields so the text cannot be edited later
-  try { pdfDoc.getForm().flatten(); } catch(e) { console.log("No fields to flatten"); }
+  try { pdfDoc.getForm().flatten(); } catch(e) {}
 
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   
-  // Snapped to I-9 Section 1 Signature Line
   firstPage.drawImage(sigImage, { x: 60, y: 400, width: 220, height: 45 });
 
   const modifiedPdfBytes = await pdfDoc.save();
