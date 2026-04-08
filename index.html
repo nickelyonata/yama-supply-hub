@@ -1182,9 +1182,9 @@ const DEFAULT_ITEMS = [
 
 let state = {
   items: [],
-  batches: JSON.parse(localStorage.getItem('yama_batches') || '{}'), // { itemId: [{qty, price, date, remaining}] }
+  batches: {}, // loaded from Google Sheets on init
   log: JSON.parse(localStorage.getItem('yama_log') || '[]'),
-  gsUrl: 'https://script.google.com/macros/s/AKfycbylwwGoURzmteGdMspkjHYMOVQ8rZi5CGdHhp7jRmxbRvo4NRpwm1-nQmps8qc7EYzw/exec',
+  gsUrl: 'https://script.google.com/macros/s/AKfycbwLARuUw2cR_1EsV2horEnbgxsheLS6kdkhER2QMhv3ICVVumIOBJQ_gJukfuGIggB8/exec',
   nextId: parseInt(localStorage.getItem('yama_nextId') || '21'),
 };
 
@@ -1193,46 +1193,43 @@ let _blockSync = false;
 function save() {
   localStorage.setItem('yama_log', JSON.stringify(state.log));
   localStorage.setItem('yama_nextId', state.nextId);
-  localStorage.setItem('yama_batches', JSON.stringify(state.batches));
   if (!_blockSync) syncInventoryToSheets();
+}
+
+function saveWithBatches() {
+  save();
+  syncBatchesToSheets();
 }
 
 async function fetchInventoryFromSheets() {
   const container = document.getElementById('itemsList');
   container.innerHTML = `<div class="empty-log" style="padding:2rem;text-align:center;color:var(--muted)">Loading inventory...</div>`;
   _blockSync = true;
-
-  // Locally cached costs — survive bad fetches across all devices that have added deliveries
-  const savedCosts = JSON.parse(localStorage.getItem('yama_item_costs') || '{}');
-
-  function applySavedCosts(items) {
-    return items.map(item => {
-      const localCost = savedCosts[item.id];
-      if ((!item.cost || item.cost === 0) && localCost) item.cost = localCost;
-      return item;
-    });
-  }
-
   try {
-    const res = await fetch(state.gsUrl + '?type=inventory&t=' + Date.now());
-    const data = await res.json();
-    if (data && Array.isArray(data) && data.length > 0) {
-      const seen = new Set();
-      state.items = applySavedCosts(data.filter(item => {
-        if (seen.has(item.id)) return false;
-        seen.add(item.id);
-        return true;
-      }));
-      state.nextId = Math.max(...state.items.map(i => i.id), 20) + 1;
+    // Fetch inventory and batches in parallel
+    const [invRes, batchRes] = await Promise.all([
+      fetch(state.gsUrl + '?type=inventory'),
+      fetch(state.gsUrl + '?type=batches')
+    ]);
+    const invData = await invRes.json();
+    const batchData = await batchRes.json();
+
+    if (invData && invData.length > 0) {
+      state.items = invData;
+      state.nextId = Math.max(...invData.map(i => i.id), 20) + 1;
     } else {
-      state.items = applySavedCosts([...DEFAULT_ITEMS]);
+      state.items = DEFAULT_ITEMS;
       _blockSync = false;
       syncInventoryToSheets();
-      _blockSync = true;
+    }
+
+    // Load batches from Sheets
+    if (batchData && typeof batchData === 'object') {
+      state.batches = batchData;
     }
   } catch (e) {
-    state.items = applySavedCosts([...DEFAULT_ITEMS]);
-    console.warn('Could not fetch inventory from Sheets, using defaults:', e);
+    state.items = DEFAULT_ITEMS;
+    console.warn('Could not fetch from Sheets, using defaults:', e);
   }
   _blockSync = false;
   renderItemsList();
@@ -1244,7 +1241,7 @@ async function syncInventoryToSheets() {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'inventory', replace: true, items: state.items })
+      body: JSON.stringify({ type: 'inventory', items: state.items })
     });
   } catch (e) {
     console.warn('Inventory sync failed:', e);
@@ -1734,6 +1731,7 @@ function setOpeningStock(itemId) {
   if (item) { item.stock = qty; item.cost = price; }
 
   save();
+  syncBatchesToSheets();
   renderAdminTable();
   renderManageList();
   showToast(`✓ Opening stock set for ${item?.name}`);
@@ -1745,7 +1743,6 @@ function updateBatchQty(itemId, batchIndex, value) {
   const oldQty = batches[batchIndex].remaining;
   const newQty = parseInt(value) || 0;
   batches[batchIndex].remaining = newQty;
-  // Update total stock accordingly
   const item = state.items.find(i => i.id === itemId);
   if (item) item.stock = item.stock - oldQty + newQty;
 }
@@ -1766,19 +1763,21 @@ function deleteBatch(itemId, batchIndex) {
   const item = state.items.find(i => i.id === itemId);
   if (item) item.stock = Math.max(0, item.stock - removed);
   save();
+  syncBatchesToSheets();
   renderAdminTable();
   renderManageList();
   showToast('✓ Batch removed');
 }
 
 function applyRestock() {
-  // Save invoice names
+  // Save invoice names and any batch edits made in the modal
   document.querySelectorAll('[data-invoice-id]').forEach(input => {
     const id = parseInt(input.dataset.invoiceId);
     const item = state.items.find(i => i.id === id);
     if (item) item.invoiceName = input.value.trim();
   });
   save();
+  syncBatchesToSheets();
   renderAdminTable();
   renderStats();
   closeModal('restockModal');
@@ -1813,6 +1812,7 @@ function deleteItem(id) {
   state.items = state.items.filter(i => i.id !== id);
   delete state.batches[id];
   save();
+  syncBatchesToSheets();
   renderItemsList();
   renderManageList();
   showToast(`"${item.name}" deleted`);
@@ -2040,20 +2040,11 @@ function addDelivery() {
   const item = state.items.find(i => i.id === itemId);
   if (item) { item.stock += qty; item.cost = price; }
 
-  // Persist cost to localStorage so it survives page reloads on all devices
-  const savedCosts = JSON.parse(localStorage.getItem('yama_item_costs') || '{}');
-  savedCosts[itemId] = price;
-  localStorage.setItem('yama_item_costs', JSON.stringify(savedCosts));
-
-  localStorage.setItem('yama_batches', JSON.stringify(state.batches));
-  localStorage.setItem('yama_nextId', String(state.nextId));
-  localStorage.setItem('yama_log', JSON.stringify(state.log));
-  syncInventoryToSheets();
-
+  save();
   renderAdminTable();
   renderStats();
   showBatchPreview(itemId);
-  syncBatchToSheets(item?.name || '', qty, price, date);
+  syncBatchesToSheets();
   showToast(`✓ Delivery added — ${qty} boxes @ $${price.toFixed(2)}/box`);
 }
 
@@ -2078,13 +2069,13 @@ function calculateFIFOCost(itemId, qtyTaken) {
   return { totalCost, breakdown };
 }
 
-async function syncBatchToSheets(itemName, qty, price, date) {
+async function syncBatchesToSheets() {
   try {
     await fetch(state.gsUrl, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'batch', itemName, qty, price, date })
+      body: JSON.stringify({ type: 'batches', batches: state.batches })
     });
   } catch(e) { console.warn('Batch sync failed:', e); }
 }
