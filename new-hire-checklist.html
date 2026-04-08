@@ -411,11 +411,11 @@
         <div class="section-icon">🇺🇸</div>
         <div>
           <div class="section-title" id="title-C">C. I-9 — Employment Eligibility Verification</div>
-          <div class="section-subtitle" id="sub-C">Download, complete Section 1, sign, then upload below</div>
+          <div class="section-subtitle" id="sub-C">Download, complete Section 1, upload, and sign below</div>
         </div>
       </div>
       <div class="section-body">
-        <div class="info-note"><span>ℹ️</span><div id="i9-note">The I-9 confirms you are legally authorized to work in the United States. Download the official USCIS form, fill out Section 1 only, sign it, then upload below. Your employer will complete Section 2.</div></div>
+        <div class="info-note"><span>ℹ️</span><div id="i9-note">The I-9 confirms you are legally authorized to work in the United States. Download the official USCIS form, fill out Section 1 only, upload below, and sign using the digital pad.</div></div>
 
         <div class="pdf-card">
           <div class="pdf-icon">📄</div>
@@ -426,21 +426,30 @@
           <a class="btn-pdf" href="https://www.uscis.gov/sites/default/files/document/forms/i-9.pdf" target="_blank" id="btn-i9-download">Download PDF</a>
         </div>
 
-        <div class="info-note" style="margin-top:0.5rem"><span>💡</span><div id="i9-tip">You only need to fill out Section 1 — your name, address, date of birth, SSN, and check your citizenship status box. Sign and date at the bottom of Section 1.</div></div>
+        <div class="info-note" style="margin-top:0.5rem"><span>💡</span><div id="i9-tip">You only need to fill out Section 1 — your name, address, date of birth, SSN, and check your citizenship status box.</div></div>
 
         <div class="divider"></div>
 
         <div class="field">
-          <label id="lbl-i9-upload">Upload Your Completed &amp; Signed I-9 <span class="req">*</span></label>
+          <label id="lbl-i9-upload">Upload Your Filled I-9 <span class="req">*</span></label>
           <div class="upload-zone">
-            <input type="file" id="i9-file" accept="image/*,.pdf" onchange="previewFile(this,'i9-name')" />
+            <input type="file" id="i9-file" accept="application/pdf" onchange="previewFile(this,'i9-name')" />
             <div class="upload-icon">📤</div>
             <div class="upload-text">
-              <strong id="upload-i9-label">Upload signed I-9</strong>
-              <span id="upload-i9-sub">PDF or photo of signed form</span>
+              <strong id="upload-i9-label">Upload filled I-9</strong>
+              <span id="upload-i9-sub">PDF form only</span>
             </div>
             <div class="file-preview" id="i9-name"></div>
           </div>
+        </div>
+
+        <div class="field" style="margin-top:1.5rem">
+          <label id="lbl-sig-i9">I-9 Signature <span class="req">*</span></label>
+          <div class="sig-wrap">
+            <div class="sig-label-overlay" id="sig-overlay-C">Sign your I-9 here</div>
+            <canvas class="sig-canvas" id="sigCanvas-C"></canvas>
+          </div>
+          <div class="sig-actions"><button class="btn-clear-sig" onclick="clearSig('C')" id="btn-clear-C">Clear Signature</button></div>
         </div>
 
         <div class="nav-row">
@@ -540,16 +549,16 @@ const T = {
     lblTam: 'TAM Card', tamYes: '✅ Yes', tamNo: '❌ No',
     uploadTamLabel: 'Upload TAM Card', uploadTamSub: 'Click to browse or drag & drop',
     lblSig: 'Employee Signature', sigHint: 'Sign here with your mouse or finger', clearSig: 'Clear Signature',
-    titleB: "B. W-4 — Employee's Withholding Certificate", subB: 'Download, complete, and upload the signed form',
-    w4Note: 'The W-4 is a federal tax withholding form required by the IRS. Please download the official form, fill it out, and sign it using the digital pad below.',
+    titleB: "B. W-4 — Employee's Withholding Certificate", subB: 'Download, complete, upload, and sign below',
+    w4Note: 'The W-4 is a federal tax withholding form required by the IRS. Please download the official form, fill it out, upload the copy, and sign using the digital pad below.',
     w4PdfTitle: 'IRS Form W-4 (2026)', w4PdfSub: "Employee's Withholding Certificate — irs.gov",
     w4Download: 'Download PDF', lblW4Upload: 'Upload Filled W-4',
     uploadW4Label: 'Upload your filled W-4', uploadW4Sub: 'PDF only',
-    titleC: 'C. I-9 — Employment Eligibility Verification', subC: 'Download, complete, and upload the signed form',
-    i9Note: 'The I-9 verifies your identity and authorization to work in the United States. Download, complete Section 1, sign, and upload below.',
+    titleC: 'C. I-9 — Employment Eligibility Verification', subC: 'Download, complete Section 1, upload, and sign below',
+    i9Note: 'The I-9 verifies your identity and authorization to work in the United States. Download, complete Section 1, upload below, and sign using the digital pad.',
     i9PdfTitle: 'USCIS Form I-9 (2023)', i9PdfSub: 'Employment Eligibility Verification — uscis.gov',
-    i9Download: 'Download PDF', lblI9Upload: 'Upload Completed & Signed I-9',
-    uploadI9Label: 'Upload your signed I-9', uploadI9Sub: 'PDF or image accepted',
+    i9Download: 'Download PDF', lblI9Upload: 'Upload Filled I-9',
+    uploadI9Label: 'Upload your filled I-9', uploadI9Sub: 'PDF only',
     titleD: 'D. Identity Documents', subD: "Upload your Social Security Card and Driver's License",
     docNote: 'Your documents are stored securely in our private Google Drive and used only for employment verification.',
     lblSSN: 'Social Security Card', uploadSSNLabel: 'Upload SS Card', uploadSSNSub: 'Photo or scan',
@@ -583,16 +592,16 @@ const T = {
     lblTam: 'Tarjeta TAM', tamYes: '✅ Sí', tamNo: '❌ No',
     uploadTamLabel: 'Subir Tarjeta TAM', uploadTamSub: 'Haga clic o arrastre el archivo',
     lblSig: 'Firma del Empleado', sigHint: 'Firme aquí con su ratón o dedo', clearSig: 'Borrar Firma',
-    titleB: 'B. W-4 — Certificado de Retención', subB: 'Descargue, complete y suba el formulario firmado',
-    w4Note: 'El W-4 es el formulario federal de retención de impuestos requerido por el IRS. Descargue, llénelo y firme usando el panel digital a continuación.',
+    titleB: 'B. W-4 — Certificado de Retención', subB: 'Descargue, complete, suba el archivo y firme abajo',
+    w4Note: 'El W-4 es el formulario federal de retención de impuestos requerido por el IRS. Descargue, llénelo, suba la copia y firme usando el panel digital a continuación.',
     w4PdfTitle: 'Formulario IRS W-4 (2026)', w4PdfSub: 'Certificado de Retención — irs.gov',
     w4Download: 'Descargar PDF', lblW4Upload: 'Subir W-4 Completado',
     uploadW4Label: 'Subir su W-4 lleno', uploadW4Sub: 'Solo PDF',
-    titleC: 'C. I-9 — Verificación de Elegibilidad', subC: 'Descargue, complete y suba el formulario firmado',
-    i9Note: 'El I-9 verifica su identidad y autorización para trabajar en EE.UU. Descargue, complete la Sección 1, firme y suba.',
+    titleC: 'C. I-9 — Verificación de Elegibilidad', subC: 'Descargue, complete la Sección 1, suba y firme abajo',
+    i9Note: 'El I-9 verifica su identidad y autorización para trabajar en EE.UU. Descargue, complete la Sección 1, suba el archivo y firme en el panel digital.',
     i9PdfTitle: 'Formulario USCIS I-9 (2023)', i9PdfSub: 'Verificación de Elegibilidad — uscis.gov',
-    i9Download: 'Descargar PDF', lblI9Upload: 'Subir I-9 Completado y Firmado',
-    uploadI9Label: 'Subir su I-9 firmado', uploadI9Sub: 'PDF o imagen aceptado',
+    i9Download: 'Descargar PDF', lblI9Upload: 'Subir I-9 Lleno',
+    uploadI9Label: 'Subir su I-9 lleno', uploadI9Sub: 'Solo PDF',
     titleD: 'D. Documentos de Identidad', subD: 'Suba su Tarjeta de Seguro Social y Licencia de Conducir',
     docNote: 'Sus documentos se almacenan de forma segura en Google Drive y se usan solo para verificación de empleo.',
     lblSSN: 'Tarjeta de Seguro Social', uploadSSNLabel: 'Subir Tarjeta SS', uploadSSNSub: 'Foto o escaneo',
@@ -626,16 +635,16 @@ const T = {
     lblTam: 'TAM 카드', tamYes: '✅ 예', tamNo: '❌ 아니오',
     uploadTamLabel: 'TAM 카드 업로드', uploadTamSub: '클릭하거나 파일을 끌어다 놓으세요',
     lblSig: '직원 서명', sigHint: '마우스 또는 손가락으로 여기에 서명하세요', clearSig: '서명 지우기',
-    titleB: 'B. W-4 — 원천징수 증명서', subB: 'PDF를 다운로드하여 작성 후 업로드하세요',
-    w4Note: 'W-4는 IRS에서 요구하는 연방 세금 원천징수 양식입니다. 공식 양식을 다운로드하여 작성하고 서명한 후 업로드하세요.',
+    titleB: 'B. W-4 — 원천징수 증명서', subB: 'PDF를 다운로드하여 작성 후, 업로드 및 서명하세요',
+    w4Note: 'W-4는 IRS에서 요구하는 연방 세금 원천징수 양식입니다. 공식 양식을 다운로드하여 작성하고 업로드한 후 디지털 패드에 서명하세요.',
     w4PdfTitle: 'IRS W-4 양식 (2026)', w4PdfSub: '직원 원천징수 증명서 — irs.gov',
     w4Download: 'PDF 다운로드', lblW4Upload: '완성된 W-4 업로드',
     uploadW4Label: '작성된 W-4 업로드', uploadW4Sub: 'PDF만 허용',
-    titleC: 'C. I-9 — 고용 자격 확인', subC: 'PDF를 다운로드하여 작성 후 업로드하세요',
-    i9Note: 'I-9 양식은 미국에서 일할 수 있는 신원 및 자격을 확인합니다. 섹션 1을 작성하고 서명한 후 업로드하세요.',
+    titleC: 'C. I-9 — 고용 자격 확인', subC: '섹션 1을 작성하고 업로드한 후 서명하세요',
+    i9Note: 'I-9 양식은 미국에서 일할 수 있는 신원 및 자격을 확인합니다. 섹션 1을 작성하여 업로드하고 아래 디지털 패드에 서명하세요.',
     i9PdfTitle: 'USCIS I-9 양식 (2023)', i9PdfSub: '고용 자격 확인 — uscis.gov',
-    i9Download: 'PDF 다운로드', lblI9Upload: '완성 및 서명된 I-9 업로드',
-    uploadI9Label: '서명된 I-9 업로드', uploadI9Sub: 'PDF 또는 이미지 허용',
+    i9Download: 'PDF 다운로드', lblI9Upload: '작성된 I-9 업로드',
+    uploadI9Label: '작성된 I-9 업로드', uploadI9Sub: 'PDF만 허용',
     titleD: 'D. 신분 서류', subD: '소셜 시큐리티 카드와 운전면허증을 업로드하세요',
     docNote: '귀하의 서류는 Google Drive에 안전하게 저장되며 고용 확인 목적으로만 사용됩니다.',
     lblSSN: '소셜 시큐리티 카드', uploadSSNLabel: 'SS 카드 업로드', uploadSSNSub: '사진 또는 스캔',
@@ -664,12 +673,13 @@ let lang = 'en';
 let currentStep = 0;
 const sigs = {
   A: { canvas: null, ctx: null, drawing: false, hasData: false },
-  B: { canvas: null, ctx: null, drawing: false, hasData: false }, // Added W4 Sig
+  B: { canvas: null, ctx: null, drawing: false, hasData: false }, // W-4
+  C: { canvas: null, ctx: null, drawing: false, hasData: false }, // I-9
   D: { canvas: null, ctx: null, drawing: false, hasData: false }
 };
 
 // Map step index → which signature pad lives on that step
-const STEP_SIGS = { 0: 'A', 1: 'B', 3: 'D' };
+const STEP_SIGS = { 0: 'A', 1: 'B', 2: 'C', 3: 'D' };
 
 // ══════════════════════════════════════════════════════════════
 //  LANGUAGE
@@ -709,6 +719,10 @@ function applyTranslations() {
   setText('title-C', t.titleC); setText('sub-C', t.subC); setText('i9-note', t.i9Note);
   setText('i9-pdf-title', t.i9PdfTitle); setText('i9-pdf-sub', t.i9PdfSub); setText('btn-i9-download', t.i9Download);
   setText('lbl-i9-upload', t.lblI9Upload + ' *'); setText('upload-i9-label', t.uploadI9Label); setText('upload-i9-sub', t.uploadI9Sub);
+  
+  // I-9 Signature
+  setText('lbl-sig-i9', t.lblSig + ' *'); setText('sig-overlay-C', t.sigHint); setText('btn-clear-C', t.clearSig);
+
   setText('title-D', t.titleD); setText('sub-D', t.subD); setText('doc-note', t.docNote);
   setText('lbl-ssn', t.lblSSN + ' *'); setText('upload-ssn-label', t.uploadSSNLabel); setText('upload-ssn-sub', t.uploadSSNSub);
   setText('lbl-dl', t.lblDL + ' *'); setText('upload-dl-label', t.uploadDLLabel); setText('upload-dl-sub', t.uploadDLSub);
@@ -816,7 +830,11 @@ function validateStep(step) {
   }
   if (step === 2) {
     if (!document.getElementById('i9-file').files.length) {
-      alert('Please upload your completed and signed I-9 before continuing.');
+      alert('Please upload your filled I-9 PDF before continuing.');
+      return false;
+    }
+    if (!sigs.C.hasData) {
+      alert(t.alertSig || 'Please provide your signature for the I-9.');
       return false;
     }
   }
@@ -824,37 +842,74 @@ function validateStep(step) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  PDF AUTO-STAMPER
+//  PDF AUTO-STAMPERS
 // ══════════════════════════════════════════════════════════════
+
+// Helper: Converts transparent canvas to a solid white PNG for reliable PDF rendering
+function getSolidSignature(canvas) {
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
+  const ctx = tempCanvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; 
+  ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+  ctx.drawImage(canvas, 0, 0);
+  return tempCanvas.toDataURL('image/png');
+}
+
+// Helper: Safely converts raw bytes to a Base64 string for Apps Script
+function bytesToBase64(bytes) {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) { binary += String.fromCharCode(bytes[i]); }
+  return window.btoa(binary);
+}
+
 async function processW4() {
   const w4Input = document.getElementById('w4-file');
   if (!w4Input.files.length || !sigs.B.hasData) return null;
 
   const pdfBytes = await w4Input.files[0].arrayBuffer();
-  const sigImageURI = sigs.B.canvas.toDataURL('image/png');
+  const sigImageURI = getSolidSignature(sigs.B.canvas); // Use solid white background
 
   const { PDFDocument } = PDFLib;
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const sigImage = await pdfDoc.embedPng(sigImageURI);
 
+  // Flatten the form fields so the text cannot be edited later
+  try { pdfDoc.getForm().flatten(); } catch(e) { console.log("No fields to flatten"); }
+
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   
-  // Stamp coordinates for standard 2026 W-4 Step 5 Signature Line
-  firstPage.drawImage(sigImage, {
-    x: 80, 
-    y: 190, 
-    width: 200, 
-    height: 40,
-  });
+  // Snapped to W-4 Step 5 Signature Line
+  firstPage.drawImage(sigImage, { x: 120, y: 110, width: 220, height: 45 });
 
   const modifiedPdfBytes = await pdfDoc.save();
-  let binary = '';
-  const len = modifiedPdfBytes.byteLength;
-  for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(modifiedPdfBytes[i]);
-  }
-  return window.btoa(binary); 
+  return bytesToBase64(modifiedPdfBytes); 
+}
+
+async function processI9() {
+  const i9Input = document.getElementById('i9-file');
+  if (!i9Input.files.length || !sigs.C.hasData) return null;
+
+  const pdfBytes = await i9Input.files[0].arrayBuffer();
+  const sigImageURI = getSolidSignature(sigs.C.canvas); // Use solid white background
+
+  const { PDFDocument } = PDFLib;
+  const pdfDoc = await PDFDocument.load(pdfBytes);
+  const sigImage = await pdfDoc.embedPng(sigImageURI);
+
+  // Flatten the form fields so the text cannot be edited later
+  try { pdfDoc.getForm().flatten(); } catch(e) { console.log("No fields to flatten"); }
+
+  const pages = pdfDoc.getPages();
+  const firstPage = pages[0];
+  
+  // Snapped to I-9 Section 1 Signature Line
+  firstPage.drawImage(sigImage, { x: 60, y: 400, width: 220, height: 45 });
+
+  const modifiedPdfBytes = await pdfDoc.save();
+  return bytesToBase64(modifiedPdfBytes); 
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -874,10 +929,10 @@ async function submitForm() {
     const files = {};
     const fileInputs = {
       foodCard: 'foodcard-file', tamCard: 'tamcard-file',
-      i9: 'i9-file', ssn: 'ssn-file', dl: 'dl-file',
+      ssn: 'ssn-file', dl: 'dl-file',
     };
     
-    // Process standard files
+    // Process standard image/pdf files
     for (const [key, inputId] of Object.entries(fileInputs)) {
       const input = document.getElementById(inputId);
       if (input.files && input.files.length) {
@@ -893,22 +948,28 @@ async function submitForm() {
     // Process W-4 PDF dynamically
     try {
       const w4Data = await processW4();
-      if (w4Data) {
-        files['w4'] = {
-          data: w4Data,
-          name: 'W-4_Signed.pdf',
-          mimeType: 'application/pdf'
-        };
-      }
+      if (w4Data) files['w4'] = { data: w4Data, name: 'W-4_Signed.pdf', mimeType: 'application/pdf' };
     } catch (err) {
-      console.error("PDF Stamp Error:", err);
+      console.error("W-4 PDF Stamp Error:", err);
       alert("There was an error stamping your W-4 signature. Please try again.");
       document.getElementById('submitting-overlay').classList.remove('active');
       document.getElementById('btn-submit').disabled = false;
       return;
     }
 
-    // Collect signature PNGs for App Script
+    // Process I-9 PDF dynamically
+    try {
+      const i9Data = await processI9();
+      if (i9Data) files['i9'] = { data: i9Data, name: 'I-9_Signed.pdf', mimeType: 'application/pdf' };
+    } catch (err) {
+      console.error("I-9 PDF Stamp Error:", err);
+      alert("There was an error stamping your I-9 signature. Please try again.");
+      document.getElementById('submitting-overlay').classList.remove('active');
+      document.getElementById('btn-submit').disabled = false;
+      return;
+    }
+
+    // Collect standard acknowledgment signature PNGs for App Script
     ['A','D'].forEach(id => {
       const key = id === 'A' ? 'sigA' : 'sigD';
       if (sigs[id] && sigs[id].hasData) {
@@ -1041,7 +1102,7 @@ function resizeCanvas(id) {
 
 // Handle Mobile Screen Rotation
 window.addEventListener('resize', () => {
-  ['A', 'B', 'D'].forEach(id => {
+  ['A', 'B', 'C', 'D'].forEach(id => {
     if (sigs[id] && sigs[id].canvas) {
       const hadData = sigs[id].hasData;
       resizeCanvas(id);
