@@ -215,7 +215,7 @@
 <div id="submitting-overlay">
   <div class="spinner"></div>
   <div class="submitting-text" id="overlay-title">Submitting your form…</div>
-  <div class="submitting-sub" id="overlay-sub">Uploading documents to Google Drive</div>
+  <div class="submitting-sub" id="overlay-sub">Preparing documents...</div>
 </div>
 
 <div id="lang-screen">
@@ -749,6 +749,16 @@ function previewFile(input, targetId) {
     document.getElementById(targetId).textContent = '✅ ' + input.files[0].name;
 }
 
+// Extremely fast Base64 chunking for large PDFs
+function bytesToBase64(bytes) {
+  let binary = '';
+  const chunkSize = 0x8000; // 32768
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+  }
+  return window.btoa(binary);
+}
+
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -758,11 +768,35 @@ function fileToBase64(file) {
   });
 }
 
-function bytesToBase64(bytes) {
-  let binary = '';
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) { binary += String.fromCharCode(bytes[i]); }
-  return window.btoa(binary);
+// ══════════════════════════════════════════════════════════════
+//  IMAGE COMPRESSOR (SHRINKS 8MB SMARTPHONE PHOTOS TO ~200KB)
+// ══════════════════════════════════════════════════════════════
+function compressImage(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = e => {
+      const img = new Image();
+      img.src = e.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width;
+        let h = img.height;
+        const max = 1200; // Maximum width or height
+        if (w > max || h > max) {
+          if (w > h) { h = Math.round((h * max) / w); w = max; }
+          else { w = Math.round((w * max) / h); h = max; }
+        }
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7); // 70% Quality JPEG
+        resolve({ data: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
+      };
+      img.onerror = () => resolve(null); // Fallback if image load fails
+    };
+    reader.onerror = () => resolve(null);
+  });
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -849,7 +883,7 @@ function validateStep(step) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  PDF AUTO-STAMPERS (TRUE TRANSPARENT PNGs)
+//  PDF AUTO-STAMPERS
 // ══════════════════════════════════════════════════════════════
 async function processW4() {
   const w4Input = document.getElementById('w4-file');
@@ -867,8 +901,7 @@ async function processW4() {
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   
-  // SHIFTED RIGHT AND UP: Sits cleanly on the Step 5 line
-  firstPage.drawImage(sigImage, { x: 140, y: 90, width: 180, height: 35 });
+  firstPage.drawImage(sigImage, { x: 140, y: 85, width: 180, height: 35 });
 
   const modifiedPdfBytes = await pdfDoc.save();
   return bytesToBase64(modifiedPdfBytes); 
@@ -890,8 +923,7 @@ async function processI9() {
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
   
-  // SHIFTED RIGHT AND UP: Pulled out of the Preparer box below
-  firstPage.drawImage(sigImage, { x: 140, y: 420, width: 180, height: 35 });
+  firstPage.drawImage(sigImage, { x: 140, y: 415, width: 180, height: 35 });
 
   const modifiedPdfBytes = await pdfDoc.save();
   return bytesToBase64(modifiedPdfBytes); 
@@ -908,6 +940,7 @@ async function submitForm() {
   if (!sigs.D.hasData) { alert(t.alertSig); return; }
 
   document.getElementById('submitting-overlay').classList.add('active');
+  document.getElementById('overlay-sub').textContent = "Optimizing and compressing images...";
   document.getElementById('btn-submit').disabled = true;
 
   try {
@@ -917,20 +950,27 @@ async function submitForm() {
       ssn: 'ssn-file', dl: 'dl-file',
     };
     
-    // Process standard image/pdf files
+    // Process standard files and COMPRESS images
     for (const [key, inputId] of Object.entries(fileInputs)) {
       const input = document.getElementById(inputId);
       if (input.files && input.files.length) {
         const file = input.files[0];
-        files[key] = {
-          data: await fileToBase64(file),
-          name: file.name,
-          mimeType: file.type,
-        };
+        if (file.type.startsWith('image/')) {
+           const compressed = await compressImage(file);
+           if (compressed) {
+              files[key] = { data: compressed.data, name: file.name.replace(/\.[^/.]+$/, "") + ".jpg", mimeType: 'image/jpeg' };
+           } else {
+              files[key] = { data: await fileToBase64(file), name: file.name, mimeType: file.type }; // Fallback
+           }
+        } else {
+           files[key] = { data: await fileToBase64(file), name: file.name, mimeType: file.type };
+        }
       }
     }
 
-    // Process W-4 PDF dynamically
+    document.getElementById('overlay-sub').textContent = "Merging digital signatures...";
+
+    // Process W-4 PDF
     try {
       const w4Data = await processW4();
       if (w4Data) files['w4'] = { data: w4Data, name: 'W-4_Signed.pdf', mimeType: 'application/pdf' };
@@ -942,7 +982,7 @@ async function submitForm() {
       return;
     }
 
-    // Process I-9 PDF dynamically
+    // Process I-9 PDF
     try {
       const i9Data = await processI9();
       if (i9Data) files['i9'] = { data: i9Data, name: 'I-9_Signed.pdf', mimeType: 'application/pdf' };
@@ -954,7 +994,7 @@ async function submitForm() {
       return;
     }
 
-    // Collect standard acknowledgment signature PNGs for App Script
+    // Collect standard acknowledgment signature PNGs
     ['A','D'].forEach(id => {
       const key = id === 'A' ? 'sigA' : 'sigD';
       if (sigs[id] && sigs[id].hasData) {
@@ -985,10 +1025,10 @@ async function submitForm() {
       files,
     };
 
+    document.getElementById('overlay-sub').textContent = "Uploading to Google Drive...";
+
     await new Promise((resolve, reject) => {
-      // THE FIX: Increased timeout to 3 minutes (180000ms) to allow heavy files to upload
-      const timer = setTimeout(() => reject(new Error('Timed out')), 180000); 
-      
+      const timer = setTimeout(() => reject(new Error('Timed out')), 180000);
       const iframe = document.createElement('iframe');
       iframe.name = 'gs_iframe_' + Date.now();
       iframe.style.display = 'none';
@@ -1012,20 +1052,19 @@ async function submitForm() {
         try {
           const iframeText = iframe.contentDocument ? iframe.contentDocument.body.innerText : '';
           const match = iframeText.match(/\{[\s\S]*\}/);
-          const result = match ? JSON.parse(match[0]) : { success: true, folderUrl: null };
-          document.body.removeChild(form);
-          document.body.removeChild(iframe);
-          resolve(result);
+          if (match) {
+            resolve(JSON.parse(match[0]));
+          } else {
+            // Google threw an HTML error page (probably still too large, or Drive is full)
+            reject(new Error("Server error"));
+          }
         } catch(e) {
-          document.body.removeChild(form);
-          document.body.removeChild(iframe);
+          // Cross-origin fallback
           resolve({ success: true, folderUrl: null });
         }
       };
       iframe.onerror = () => {
         clearTimeout(timer);
-        document.body.removeChild(form);
-        document.body.removeChild(iframe);
         reject(new Error('Form submission failed'));
       };
       form.submit();
@@ -1087,7 +1126,6 @@ function resizeCanvas(id) {
   sigs[id].ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 }
 
-// Handle Mobile Screen Rotation
 window.addEventListener('resize', () => {
   ['A', 'B', 'C', 'D'].forEach(id => {
     if (sigs[id] && sigs[id].canvas) {
