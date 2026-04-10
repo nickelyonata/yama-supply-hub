@@ -1188,25 +1188,16 @@ let state = {
   nextId: parseInt(localStorage.getItem('yama_nextId') || '21'),
 };
 
-let _blockSync = false;
-
 function save() {
   localStorage.setItem('yama_log', JSON.stringify(state.log));
   localStorage.setItem('yama_nextId', state.nextId);
-  if (!_blockSync) syncInventoryToSheets();
-}
-
-function saveWithBatches() {
-  save();
-  syncBatchesToSheets();
+  // Do NOT auto-sync inventory here — call syncInventoryToSheets() explicitly only when needed
 }
 
 async function fetchInventoryFromSheets() {
   const container = document.getElementById('itemsList');
   container.innerHTML = `<div class="empty-log" style="padding:2rem;text-align:center;color:var(--muted)">Loading inventory...</div>`;
-  _blockSync = true;
   try {
-    // Fetch inventory and batches in parallel
     const [invRes, batchRes] = await Promise.all([
       fetch(state.gsUrl + '?type=inventory'),
       fetch(state.gsUrl + '?type=batches')
@@ -1218,12 +1209,11 @@ async function fetchInventoryFromSheets() {
       state.items = invData;
       state.nextId = Math.max(...invData.map(i => i.id), 20) + 1;
     } else {
+      // Sheet is empty — push defaults once only
       state.items = DEFAULT_ITEMS;
-      _blockSync = false;
       syncInventoryToSheets();
     }
 
-    // Load batches from Sheets
     if (batchData && typeof batchData === 'object') {
       state.batches = batchData;
     }
@@ -1231,7 +1221,6 @@ async function fetchInventoryFromSheets() {
     state.items = DEFAULT_ITEMS;
     console.warn('Could not fetch from Sheets, using defaults:', e);
   }
-  _blockSync = false;
   renderItemsList();
 }
 
