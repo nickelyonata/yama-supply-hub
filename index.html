@@ -1720,6 +1720,7 @@ function setOpeningStock(itemId) {
   if (item) { item.stock = qty; item.cost = price; }
 
   save();
+  syncInventoryToSheets();
   syncBatchesToSheets();
   renderAdminTable();
   renderManageList();
@@ -1752,6 +1753,7 @@ function deleteBatch(itemId, batchIndex) {
   const item = state.items.find(i => i.id === itemId);
   if (item) item.stock = Math.max(0, item.stock - removed);
   save();
+  syncInventoryToSheets();
   syncBatchesToSheets();
   renderAdminTable();
   renderManageList();
@@ -1766,6 +1768,7 @@ function applyRestock() {
     if (item) item.invoiceName = input.value.trim();
   });
   save();
+  syncInventoryToSheets();
   syncBatchesToSheets();
   renderAdminTable();
   renderStats();
@@ -1789,7 +1792,7 @@ function saveRename(id, input) {
   const newName = input.value.trim();
   const item = state.items.find(i => i.id === id);
   if (!item) return;
-  if (newName) { item.name = newName; save(); renderItemsList(); }
+  if (newName) { item.name = newName; save(); syncInventoryToSheets(); renderItemsList(); }
   const cell = document.getElementById(`nameCell-${id}`);
   if (cell) cell.innerHTML = `<div style="font-weight:600;font-size:0.95rem">${item.name}</div>`;
 }
@@ -1801,6 +1804,7 @@ function deleteItem(id) {
   state.items = state.items.filter(i => i.id !== id);
   delete state.batches[id];
   save();
+  syncInventoryToSheets();
   syncBatchesToSheets();
   renderItemsList();
   renderManageList();
@@ -2030,6 +2034,7 @@ function addDelivery() {
   if (item) { item.stock += qty; item.cost = price; }
 
   save();
+  syncInventoryToSheets();
   renderAdminTable();
   renderStats();
   showBatchPreview(itemId);
