@@ -1761,12 +1761,22 @@ function deleteBatch(itemId, batchIndex) {
 }
 
 function applyRestock() {
-  // Save invoice names and any batch edits made in the modal
+  // Save invoice names
   document.querySelectorAll('[data-invoice-id]').forEach(input => {
     const id = parseInt(input.dataset.invoiceId);
     const item = state.items.find(i => i.id === id);
     if (item) item.invoiceName = input.value.trim();
   });
+
+  // Recalculate cost and stock from batch data for each item
+  state.items.forEach(item => {
+    const batches = state.batches[item.id];
+    if (batches && batches.length > 0) {
+      item.cost = batches[0].price; // cost = oldest batch price (FIFO)
+      item.stock = batches.reduce((sum, b) => sum + b.remaining, 0);
+    }
+  });
+
   save();
   syncInventoryToSheets();
   syncBatchesToSheets();
