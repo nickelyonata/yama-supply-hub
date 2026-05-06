@@ -1257,7 +1257,7 @@ let state = {
   items: [],
   batches: {}, // loaded from Google Sheets on init
   log: JSON.parse(localStorage.getItem('yama_log') || '[]'),
-  gsUrl: 'https://script.google.com/macros/s/AKfycby1SVsnMNiegWH5vXesQCfY_z5_hXgTDemNR5yjxtTPMXI9axjK5_Osk3DBtT0kybI/exec',
+  gsUrl: 'https://script.google.com/macros/s/AKfycbzuZ_rkflzpbRAEe-_o0e1oFyf9Yl-YMFD9amfmRqMT49Vt4pQLQOIbg-PY5_6MzmKb/exec',
   nextId: parseInt(localStorage.getItem('yama_nextId') || '21'),
 };
 
@@ -1963,7 +1963,24 @@ function getFilteredLog(period) {
   return logs;
 }
 
-function renderCostReport() {
+async function renderCostReport() {
+  // Always fetch latest log from Sheets first
+  try {
+    const res = await fetch(state.gsUrl);
+    const data = await res.json();
+    if (data && data.length > 0) {
+      // Merge Sheets log into state.log — Sheets is source of truth for costs
+      state.log = data.map(entry => ({
+        ...entry,
+        totalCost: typeof entry.totalCost === 'number'
+          ? entry.totalCost
+          : parseFloat(String(entry.totalCost).replace(/[^0-9.]/g, '')) || 0
+      }));
+    }
+  } catch(e) {
+    console.warn('Could not fetch log from Sheets for cost report:', e);
+  }
+
   const logs = getFilteredLog(costPeriod);
   const restaurants = ['Yama Cheyenne', 'Yama Spring Mountain', 'Kimchi', 'Yama Flamingo', 'Yama Fremont'];
 
@@ -1971,7 +1988,7 @@ function renderCostReport() {
   const titleEl = document.getElementById('locationBreakdownTitle');
   if (titleEl) titleEl.textContent = costLocation !== 'all' ? `Showing: ${costLocation}` : '';
 
-  // Cost per restaurant cards
+  // Cost per restaurant cards — always use unfiltered by location
   const restCosts = {};
   restaurants.forEach(r => restCosts[r] = 0);
   state.log.filter(entry => {
@@ -1996,7 +2013,6 @@ function renderCostReport() {
   const totalAll = Object.values(restCosts).reduce((a, b) => a + b, 0);
 
   document.getElementById('restaurantCosts').innerHTML = [
-    // Total card first
     `<div class="restaurant-cost-card" style="border-color:var(--accent)">
       <div class="restaurant-cost-name" style="color:var(--accent)">Total (All)</div>
       <div class="restaurant-cost-amount">$${totalAll.toFixed(2)}</div>
@@ -2013,7 +2029,7 @@ function renderCostReport() {
   // Monthly chart
   renderMonthlyChart();
 
-  // Cost per item
+  // Cost per item — use filtered log
   const itemCosts = {};
   logs.forEach(entry => {
     if (Array.isArray(entry.items)) {
@@ -2358,7 +2374,8 @@ async function sendToGoogleSheets(logEntry) {
         restaurant: logEntry.restaurant,
         staff: logEntry.staff,
         items: logEntry.items.map(i => `${i.qty}x ${i.name}`).join(', '),
-        totalCost: logEntry.totalCost > 0 ? `$${logEntry.totalCost.toFixed(2)}` : ''
+        totalCost: logEntry.totalCost || 0,
+        itemsJson: JSON.stringify(logEntry.items)
       })
     });
   } catch (e) {
