@@ -826,7 +826,23 @@
   .restaurant-cost-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
   .restaurant-cost-name { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; }
   .restaurant-cost-amount { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--accent); }
-  .period-btn { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.4rem 0.9rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+  .location-btn {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 0.35rem 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .location-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 600;
+  } font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.4rem 0.9rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); cursor: pointer; transition: all 0.2s; }
   .period-btn:hover { border-color: var(--accent); color: var(--accent); }
   .period-btn.active { background: rgba(232,197,71,0.1); border-color: var(--accent); color: var(--accent); }
   .cost-summary-wrap { max-width: 1000px; margin: 0 auto 2rem; padding: 0 2rem; }
@@ -1027,19 +1043,61 @@
   <div id="tab-costs" class="tab-content">
     <div class="cost-summary-wrap">
 
-      <!-- Period selector -->
-      <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <button class="period-btn active" onclick="setCostPeriod('week', this)">This Week</button>
-        <button class="period-btn" onclick="setCostPeriod('month', this)">This Month</button>
-        <button class="period-btn" onclick="setCostPeriod('all', this)">All Time</button>
+      <!-- Filters Row -->
+      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:flex-end;margin-bottom:1.5rem;">
+        <!-- Period buttons -->
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <button class="period-btn active" onclick="setCostPeriod('week', this)">This Week</button>
+          <button class="period-btn" onclick="setCostPeriod('month', this)">This Month</button>
+          <button class="period-btn" onclick="setCostPeriod('all', this)">All Time</button>
+          <button class="period-btn" onclick="setCostPeriod('custom', this)">Custom Range</button>
+        </div>
+        <!-- Export -->
+        <button class="restock-btn" onclick="exportCostCSV()" style="margin-left:auto">⬇ Export CSV</button>
       </div>
 
-      <!-- Per Restaurant -->
-      <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Cost by Restaurant</div>
-      <div id="restaurantCosts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem;margin-bottom:2rem;"></div>
+      <!-- Custom date range -->
+      <div id="customDateRange" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:0.75rem;align-items:end;">
+          <div class="input-group" style="margin:0">
+            <label>From</label>
+            <input type="date" id="dateFrom" onchange="renderCostReport()" />
+          </div>
+          <div class="input-group" style="margin:0">
+            <label>To</label>
+            <input type="date" id="dateTo" onchange="renderCostReport()" />
+          </div>
+          <button class="modal-btn" style="padding:0.5rem 1rem;margin:0" onclick="renderCostReport()">Apply</button>
+        </div>
+      </div>
+
+      <!-- Location Filter -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Filter by Location</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+          <button class="location-btn active" onclick="setCostLocation('all', this)">All Locations</button>
+          <button class="location-btn" onclick="setCostLocation('Yama Cheyenne', this)">Yama Cheyenne</button>
+          <button class="location-btn" onclick="setCostLocation('Yama Spring Mountain', this)">Yama Spring Mountain</button>
+          <button class="location-btn" onclick="setCostLocation('Kimchi', this)">Kimchi</button>
+          <button class="location-btn" onclick="setCostLocation('Yama Flamingo', this)">Yama Flamingo</button>
+          <button class="location-btn" onclick="setCostLocation('Yama Fremont', this)">Yama Fremont</button>
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div id="restaurantCosts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;margin-bottom:2rem;"></div>
+
+      <!-- Monthly chart -->
+      <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Monthly Cost Trend</div>
+      <div class="admin-table-card" style="margin-bottom:2rem;padding:1.25rem;">
+        <div id="costChart" style="display:flex;align-items:flex-end;gap:0.5rem;height:140px;overflow-x:auto;padding-bottom:0.5rem;"></div>
+      </div>
 
       <!-- Per Item breakdown -->
-      <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Cost by Item</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Cost by Item</div>
+        <div id="locationBreakdownTitle" style="font-size:0.75rem;color:var(--accent)"></div>
+      </div>
       <div class="admin-table-card" style="margin-bottom:2rem;">
         <table>
           <thead>
@@ -1653,7 +1711,7 @@ function switchTab(name, btn) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'costs') renderCostReport();
+  if (name === 'costs') { renderCostReport(); }
   if (name === 'history') fetchLogFromSheets();
 }
 
@@ -1865,54 +1923,106 @@ function addNewItem() {
 }
 
 // ============================================================
+// ============================================================
 // COST REPORT
 // ============================================================
 let costPeriod = 'week';
+let costLocation = 'all';
 
 function setCostPeriod(period, btn) {
   costPeriod = period;
   document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('customDateRange').style.display = period === 'custom' ? 'block' : 'none';
+  if (period !== 'custom') renderCostReport();
+}
+
+function setCostLocation(location, btn) {
+  costLocation = location;
+  document.querySelectorAll('.location-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderCostReport();
 }
 
 function getFilteredLog(period) {
   const now = Date.now();
-  return state.log.filter(entry => {
+  let logs = state.log.filter(entry => {
     const t = new Date(entry.time).getTime();
     if (period === 'week') return t > now - 7 * 24 * 3600 * 1000;
     if (period === 'month') return t > now - 30 * 24 * 3600 * 1000;
+    if (period === 'custom') {
+      const from = document.getElementById('dateFrom')?.value;
+      const to = document.getElementById('dateTo')?.value;
+      if (from && t < new Date(from).getTime()) return false;
+      if (to && t > new Date(to).getTime() + 86400000) return false;
+      return true;
+    }
     return true;
   });
+  if (costLocation !== 'all') logs = logs.filter(e => e.restaurant === costLocation);
+  return logs;
 }
 
 function renderCostReport() {
   const logs = getFilteredLog(costPeriod);
-  const restaurants = ['Yama Cheyenne', 'Yama Spring Mountain', 'Kimchi', 'Yama Flamingo'];
+  const restaurants = ['Yama Cheyenne', 'Yama Spring Mountain', 'Kimchi', 'Yama Flamingo', 'Yama Fremont'];
 
-  // Cost per restaurant
+  // Update location breakdown title
+  const titleEl = document.getElementById('locationBreakdownTitle');
+  if (titleEl) titleEl.textContent = costLocation !== 'all' ? `Showing: ${costLocation}` : '';
+
+  // Cost per restaurant cards
   const restCosts = {};
   restaurants.forEach(r => restCosts[r] = 0);
-  logs.forEach(entry => {
-    const cost = entry.totalCost || entry.items.reduce((s, i) => s + (i.total || 0), 0);
+  state.log.filter(entry => {
+    const t = new Date(entry.time).getTime();
+    const now = Date.now();
+    if (costPeriod === 'week') return t > now - 7 * 24 * 3600 * 1000;
+    if (costPeriod === 'month') return t > now - 30 * 24 * 3600 * 1000;
+    if (costPeriod === 'custom') {
+      const from = document.getElementById('dateFrom')?.value;
+      const to = document.getElementById('dateTo')?.value;
+      if (from && t < new Date(from).getTime()) return false;
+      if (to && t > new Date(to).getTime() + 86400000) return false;
+    }
+    return true;
+  }).forEach(entry => {
+    const cost = typeof entry.totalCost === 'number'
+      ? entry.totalCost
+      : parseFloat(String(entry.totalCost).replace(/[^0-9.]/g, '')) || 0;
     if (restCosts[entry.restaurant] !== undefined) restCosts[entry.restaurant] += cost;
   });
 
-  document.getElementById('restaurantCosts').innerHTML = restaurants.map(r => `
-    <div class="restaurant-cost-card">
-      <div class="restaurant-cost-name">${r}</div>
-      <div class="restaurant-cost-amount">$${restCosts[r].toFixed(2)}</div>
-    </div>
-  `).join('');
+  const totalAll = Object.values(restCosts).reduce((a, b) => a + b, 0);
+
+  document.getElementById('restaurantCosts').innerHTML = [
+    // Total card first
+    `<div class="restaurant-cost-card" style="border-color:var(--accent)">
+      <div class="restaurant-cost-name" style="color:var(--accent)">Total (All)</div>
+      <div class="restaurant-cost-amount">$${totalAll.toFixed(2)}</div>
+    </div>`,
+    ...restaurants.map(r => `
+      <div class="restaurant-cost-card" style="${costLocation === r ? 'border-color:var(--accent)' : ''}">
+        <div class="restaurant-cost-name">${r}</div>
+        <div class="restaurant-cost-amount">$${restCosts[r].toFixed(2)}</div>
+        ${totalAll > 0 ? `<div style="font-size:0.68rem;color:var(--muted);margin-top:4px">${((restCosts[r]/totalAll)*100).toFixed(1)}% of total</div>` : ''}
+      </div>
+    `)
+  ].join('');
+
+  // Monthly chart
+  renderMonthlyChart();
 
   // Cost per item
   const itemCosts = {};
   logs.forEach(entry => {
-    entry.items.forEach(i => {
-      if (!itemCosts[i.name]) itemCosts[i.name] = { qty: 0, total: 0, cost: i.cost || 0 };
-      itemCosts[i.name].qty += i.qty;
-      itemCosts[i.name].total += i.total || 0;
-    });
+    if (Array.isArray(entry.items)) {
+      entry.items.forEach(i => {
+        if (!itemCosts[i.name]) itemCosts[i.name] = { qty: 0, total: 0, cost: i.cost || 0 };
+        itemCosts[i.name].qty += i.qty;
+        itemCosts[i.name].total += i.total || 0;
+      });
+    }
   });
 
   const sorted = Object.entries(itemCosts).sort((a, b) => b[1].total - a[1].total);
@@ -1933,6 +2043,71 @@ function renderCostReport() {
       </tr>
     `;
   }).join('');
+}
+
+function renderMonthlyChart() {
+  const chart = document.getElementById('costChart');
+  if (!chart) return;
+
+  // Group all logs by month
+  const monthly = {};
+  state.log.forEach(entry => {
+    const d = new Date(entry.time);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+    if (!monthly[key]) monthly[key] = { label, total: 0 };
+    const cost = typeof entry.totalCost === 'number'
+      ? entry.totalCost
+      : parseFloat(String(entry.totalCost).replace(/[^0-9.]/g, '')) || 0;
+    if (costLocation === 'all' || entry.restaurant === costLocation) {
+      monthly[key].total += cost;
+    }
+  });
+
+  const keys = Object.keys(monthly).sort().slice(-6); // last 6 months
+  if (keys.length === 0) { chart.innerHTML = `<div style="color:var(--muted);font-size:0.75rem;padding:1rem">No data yet</div>`; return; }
+
+  const max = Math.max(...keys.map(k => monthly[k].total), 1);
+
+  chart.innerHTML = keys.map(k => {
+    const { label, total } = monthly[k];
+    const pct = Math.round((total / max) * 100);
+    return `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem;min-width:60px;flex:1">
+        <div style="font-size:0.62rem;color:var(--accent)">$${total.toFixed(0)}</div>
+        <div style="width:100%;background:var(--surface2);border-radius:4px 4px 0 0;height:${Math.max(pct, 4)}%;min-height:4px;background:var(--accent);opacity:0.85;transition:height 0.3s"></div>
+        <div style="font-size:0.62rem;color:var(--muted);text-align:center">${label}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function exportCostCSV() {
+  const logs = getFilteredLog(costPeriod);
+  const rows = [['Date', 'Restaurant', 'Staff', 'Items', 'Total Cost']];
+
+  logs.forEach(entry => {
+    const date = new Date(entry.time).toLocaleDateString('en-US');
+    const items = Array.isArray(entry.items)
+      ? entry.items.map(i => `${i.qty}x ${i.name}`).join('; ')
+      : entry.items;
+    const cost = typeof entry.totalCost === 'number'
+      ? entry.totalCost.toFixed(2)
+      : String(entry.totalCost).replace(/[^0-9.]/g, '') || '0';
+    rows.push([date, entry.restaurant, entry.staff, items, cost]);
+  });
+
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const period = costPeriod === 'custom' ? 'custom' : costPeriod;
+  const loc = costLocation === 'all' ? 'all-locations' : costLocation.replace(/\s+/g, '-');
+  a.download = `yama-cost-report-${period}-${loc}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ CSV exported!');
 }
 
 
