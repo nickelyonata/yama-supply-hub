@@ -873,6 +873,7 @@
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
   <div class="logo">
     <div class="logo-dot"></div>
@@ -883,6 +884,7 @@
   </div>
 </header>
 
+<!-- STAFF VIEW -->
 <div id="staffView" class="view active">
   <div class="staff-hero">
     <div class="step-label">Warehouse Request Form</div>
@@ -890,6 +892,7 @@
     <p class="subtitle">Fill in the form below. Stock will update automatically.</p>
   </div>
 
+  <!-- Step 1: Restaurant -->
   <div class="form-card" style="max-width:760px;margin:0 auto 1.5rem;padding:1.75rem 2rem;">
     <div class="form-section-title">Step 1 — Select Restaurant</div>
     <div class="restaurant-grid">
@@ -920,6 +923,7 @@
     </div>
   </div>
 
+  <!-- Items -->
   <div class="items-container">
     <div class="items-header">
       <span class="items-title">Step 3 — Select Items & Quantities</span>
@@ -928,6 +932,7 @@
     <div id="itemsList"></div>
   </div>
 
+  <!-- Step 4 - Photo -->
   <div class="form-card" style="max-width:760px;margin:0 auto 1.5rem;">
     <div class="form-section-title">Step 4 — Take a Photo of Items</div>
     <p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;">Take a clear photo of the items you are taking from the shelf. This is required before submitting.</p>
@@ -942,11 +947,13 @@
     <div id="photoError" style="display:none;color:var(--red);font-size:0.75rem;margin-top:0.5rem;">⚠ Photo is required before submitting.</div>
   </div>
 
+  <!-- Submit -->
   <div class="submit-area" style="padding:0 0;max-width:760px;margin:0 auto 3rem;">
     <button class="submit-btn" onclick="submitRequest()">Submit Request</button>
   </div>
 </div>
 
+<!-- ADMIN VIEW -->
 <div id="adminView" class="view">
   <div class="admin-header">
     <div>
@@ -956,6 +963,7 @@
     <button class="logout-btn" onclick="logout()">Log Out</button>
   </div>
 
+  <!-- Google Sheets Config -->
   <div class="gs-config">
     <div class="gs-config-card">
       <div class="gs-dot" id="gsDot"></div>
@@ -964,14 +972,17 @@
     </div>
   </div>
 
+  <!-- Stats -->
   <div class="stats-row" id="statsRow"></div>
 
+  <!-- Tabs -->
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('inventory', this)">Inventory</button>
     <button class="tab-btn" onclick="switchTab('history', this)">Activity Log</button>
     <button class="tab-btn" onclick="switchTab('costs', this)">Cost Report</button>
   </div>
 
+  <!-- Inventory Tab -->
   <div id="tab-inventory" class="tab-content active">
     <div class="admin-table-wrap">
       <div class="admin-table-card">
@@ -999,6 +1010,7 @@
     </div>
   </div>
 
+  <!-- History Tab -->
   <div id="tab-history" class="tab-content">
     <div class="log-wrap">
       <div class="log-card">
@@ -1011,18 +1023,22 @@
     </div>
   </div>
 
+  <!-- Cost Report Tab -->
   <div id="tab-costs" class="tab-content">
     <div class="cost-summary-wrap">
 
+      <!-- Period selector -->
       <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
         <button class="period-btn active" onclick="setCostPeriod('week', this)">This Week</button>
         <button class="period-btn" onclick="setCostPeriod('month', this)">This Month</button>
         <button class="period-btn" onclick="setCostPeriod('all', this)">All Time</button>
       </div>
 
+      <!-- Per Restaurant -->
       <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Cost by Restaurant</div>
       <div id="restaurantCosts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem;margin-bottom:2rem;"></div>
 
+      <!-- Per Item breakdown -->
       <div style="font-family:var(--font-display);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Cost by Item</div>
       <div class="admin-table-card" style="margin-bottom:2rem;">
         <table>
@@ -1042,6 +1058,7 @@
   </div>
 </div>
 
+<!-- LOGIN MODAL -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
@@ -1056,6 +1073,7 @@
   </div>
 </div>
 
+<!-- RESTOCK MODAL -->
 <div class="modal-overlay" id="restockModal">
   <div class="modal restock-modal">
     <button class="modal-close" onclick="closeModal('restockModal')">✕</button>
@@ -1070,6 +1088,7 @@
   </div>
 </div>
 
+<!-- GS SETUP MODAL -->
 <div class="modal-overlay" id="gsModal">
   <div class="modal" style="width:500px">
     <button class="modal-close" onclick="closeModal('gsModal')">✕</button>
@@ -1088,6 +1107,7 @@
   </div>
 </div>
 
+<!-- NEW DELIVERY MODAL -->
 <div class="modal-overlay" id="deliveryModal">
   <div class="modal" style="width:min(600px,95vw)">
     <button class="modal-close" onclick="closeModal('deliveryModal')">✕</button>
@@ -1118,6 +1138,7 @@
       <input type="date" id="deliveryDate" />
     </div>
 
+    <!-- Batch queue preview -->
     <div id="batchPreview" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:0.8rem;">
       <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem">Current Batch Queue (FIFO)</div>
       <div id="batchList"></div>
@@ -1127,6 +1148,7 @@
   </div>
 </div>
 
+<!-- MISMATCH WARNING MODAL -->
 <div class="modal-overlay" id="mismatchModal">
   <div class="modal" style="width:460px">
     <div style="font-size:2rem;margin-bottom:0.75rem">⚠️</div>
@@ -1138,6 +1160,7 @@
   </div>
 </div>
 
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1176,10 +1199,7 @@ let state = {
   items: [],
   batches: {}, // loaded from Google Sheets on init
   log: JSON.parse(localStorage.getItem('yama_log') || '[]'),
-  
-  // ---> NEW URL INSERTED HERE <---
-  gsUrl: 'https://script.google.com/macros/s/AKfycbyXeKyHt-eX54LmWnjPeU97ebab5vGlGpNtT5U9EsYiVTayNHt-78AyN6iaMyjYDXgn/exec',
-  
+  gsUrl: 'https://script.google.com/macros/s/AKfycby1SVsnMNiegWH5vXesQCfY_z5_hXgTDemNR5yjxtTPMXI9axjK5_Osk3DBtT0kybI/exec',
   nextId: parseInt(localStorage.getItem('yama_nextId') || '21'),
 };
 
@@ -1685,6 +1705,7 @@ function renderManageList() {
 
     return `
       <div style="border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;">
+        <!-- Item Header -->
         <div style="display:grid;grid-template-columns:1fr auto auto;gap:0.5rem;align-items:start;margin-bottom:0.75rem;">
           <div>
             <div style="font-weight:600;font-size:0.95rem;margin-bottom:4px" id="nameCell-${item.id}">${item.name}</div>
@@ -1698,6 +1719,7 @@ function renderManageList() {
           <button class="icon-btn delete" onclick="deleteItem(${item.id})" title="Delete item">✕</button>
         </div>
 
+        <!-- Batch Header -->
         <div style="display:grid;grid-template-columns:1fr 120px 120px auto;gap:0.5rem;padding:0 0.75rem;margin-bottom:0.3rem;">
           <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Batch</div>
           <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);text-align:center">Remaining Qty</div>
@@ -1705,6 +1727,7 @@ function renderManageList() {
           <div></div>
         </div>
 
+        <!-- Batch Rows -->
         <div id="batchRows-${item.id}">${batchRows}</div>
       </div>
     `;
@@ -2100,10 +2123,7 @@ function addDelivery() {
   renderStats();
   showBatchPreview(itemId);
   syncBatchesToSheets();
-  
-  // NEW LINE: Trigger the Google Sheet sync specifically for the new delivery
-  logDeliveryToSheets(item, qty, price, date);
-
+  logDeliveryToSheets(item?.name || '', qty, price, date);
   showToast(`✓ Delivery added — ${qty} boxes @ $${price.toFixed(2)}/box`);
 }
 
@@ -2139,6 +2159,17 @@ async function syncBatchesToSheets() {
   } catch(e) { console.warn('Batch sync failed:', e); }
 }
 
+async function logDeliveryToSheets(itemName, qty, price, date) {
+  try {
+    await fetch(state.gsUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'delivery_log', itemName, qty, price, date, total: qty * price })
+    });
+  } catch(e) { console.warn('Delivery log failed:', e); }
+}
+
 async function sendToGoogleSheets(logEntry) {
   if (!state.gsUrl) return;
   try {
@@ -2156,30 +2187,6 @@ async function sendToGoogleSheets(logEntry) {
     });
   } catch (e) {
     console.warn('GS sync failed:', e);
-  }
-}
-
-// NEW FUNCTION: Send new delivery entries directly to the Google Sheet
-async function logDeliveryToSheets(item, qty, price, date) {
-  if (!state.gsUrl) return;
-  const totalValue = qty * price;
-  
-  try {
-    await fetch(state.gsUrl, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'new_delivery',
-        date: date,
-        itemName: item.name,
-        qty: qty,
-        price: price,
-        total: totalValue
-      })
-    });
-  } catch (e) {
-    console.warn('Delivery GS sync failed:', e);
   }
 }
 
