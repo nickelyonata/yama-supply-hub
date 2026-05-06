@@ -1858,6 +1858,7 @@ function addNewItem() {
   const newItem = { id: state.nextId++, name, invoiceName: '', category: 'General', stock: 0, cost: 0 };
   state.items.push(newItem);
   save();
+  syncInventoryToSheets();
   nameInput.value = '';
   renderManageList();
   showToast(`✓ "${name}" added`);
