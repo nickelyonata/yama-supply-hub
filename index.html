@@ -1176,7 +1176,10 @@ let state = {
   items: [],
   batches: {}, // loaded from Google Sheets on init
   log: JSON.parse(localStorage.getItem('yama_log') || '[]'),
-  gsUrl: 'https://script.google.com/macros/s/AKfycbwLARuUw2cR_1EsV2horEnbgxsheLS6kdkhER2QMhv3ICVVumIOBJQ_gJukfuGIggB8/exec',
+  
+  // ---> NEW URL INSERTED HERE <---
+  gsUrl: 'https://script.google.com/macros/s/AKfycbyXeKyHt-eX54LmWnjPeU97ebab5vGlGpNtT5U9EsYiVTayNHt-78AyN6iaMyjYDXgn/exec',
+  
   nextId: parseInt(localStorage.getItem('yama_nextId') || '21'),
 };
 
