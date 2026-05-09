@@ -851,17 +851,8 @@
   /* STARTING STOCK */
   .item-row.has-qty { background: rgba(232,197,71,0.03); border-left: 2px solid var(--accent); }
   .item-row.mismatch { background: rgba(248,113,113,0.06); border-left: 2px solid var(--red); }
-  .starting-stock-wrap {
-    display: none;
-    margin-top: 0.6rem;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-  .item-row.has-qty .starting-stock-wrap { display: flex; }
-  .starting-stock-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
   .starting-stock-input {
-    width: 75px;
+    width: 100%;
     background: var(--surface2);
     border: 1.5px solid var(--border);
     border-radius: 6px;
@@ -1345,13 +1336,6 @@ function renderItemsList(filter = '') {
         <div style="flex:1">
           <div class="item-name">${item.name}</div>
           <div style="font-size:0.7rem;color:var(--muted);margin-top:2px">${item.category}</div>
-          <div class="starting-stock-wrap">
-            <span class="starting-stock-label">Count stock physically →</span>
-            <input class="starting-stock-input" type="number" min="0"
-              id="startstock-${item.id}"
-              placeholder="Enter count"
-              oninput="verifyStartingStock(${item.id})" />
-          </div>
         </div>
         <div class="qty-control">
           <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
@@ -1359,6 +1343,17 @@ function renderItemsList(filter = '') {
             onchange="setQty(${item.id}, this.value)" />
           <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
         </div>
+        ${hasQty ? `
+        <div style="width:100%;margin-top:0.6rem;background:var(--surface2);border:1.5px solid var(--accent);border-radius:8px;padding:0.6rem 0.75rem;">
+          <div style="font-size:0.7rem;color:var(--accent);font-weight:600;margin-bottom:0.4rem;">
+            📋 Before taking — how many boxes are on the shelf RIGHT NOW?
+          </div>
+          <input class="starting-stock-input" type="number" min="0"
+            id="startstock-${item.id}"
+            placeholder="Enter shelf count here"
+            oninput="verifyStartingStock(${item.id})"
+            style="width:100%;font-size:0.85rem;padding:0.5rem 0.75rem;" />
+        </div>` : ''}
       </div>
     `;
   }).join('');
@@ -1383,15 +1378,33 @@ function setQty(id, val) {
 }
 
 function updateItemRowState(id) {
+  const qty = quantities[id] || 0;
   const row = document.getElementById(`itemrow-${id}`);
   if (!row) return;
-  const qty = quantities[id] || 0;
+
   if (qty > 0) {
     row.classList.add('has-qty');
+    // Show count box if not already there
+    if (!document.getElementById(`startstock-${id}`)) {
+      const countBox = document.createElement('div');
+      countBox.style.cssText = 'width:100%;margin-top:0.6rem;background:var(--surface2);border:1.5px solid var(--accent);border-radius:8px;padding:0.6rem 0.75rem;';
+      countBox.innerHTML = `
+        <div style="font-size:0.7rem;color:var(--accent);font-weight:600;margin-bottom:0.4rem;">
+          📋 Before taking — how many boxes are on the shelf RIGHT NOW?
+        </div>
+        <input class="starting-stock-input" type="number" min="0"
+          id="startstock-${id}"
+          placeholder="Enter shelf count here"
+          oninput="verifyStartingStock(${id})"
+          style="width:100%;font-size:0.85rem;padding:0.5rem 0.75rem;" />
+      `;
+      row.appendChild(countBox);
+    }
   } else {
     row.classList.remove('has-qty', 'mismatch');
-    const ss = document.getElementById(`startstock-${id}`);
-    if (ss) { ss.value = ''; ss.classList.remove('error', 'ok'); }
+    // Remove count box
+    const existing = document.getElementById(`startstock-${id}`);
+    if (existing) existing.closest('div[style*="border:1.5px"]')?.remove();
   }
   verifyStartingStock(id);
 }
