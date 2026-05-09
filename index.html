@@ -1632,7 +1632,11 @@ async function fetchLogFromSheets() {
       return `
         <div class="log-entry" id="logentry-${index}">
           <div class="log-time">${timeStr}</div>
-          <div class="log-detail"><strong>${entry.staff}</strong> took: ${entry.items}</div>
+          <div class="log-detail"><strong>${entry.staff}</strong> took: ${
+            Array.isArray(entry.items)
+              ? entry.items.map(i => `<strong>${i.qty}×</strong> ${i.name}`).join(', ')
+              : entry.items
+          }</div>
           <div style="display:flex;align-items:center;gap:0.5rem">
             <div class="log-restaurant">${entry.restaurant}</div>
           </div>
@@ -2236,76 +2240,47 @@ function removePhoto(index) {
 }
 
 async function sendToDiscord(logEntry) {
-  const itemList = logEntry.items.map(i => {
-    const lineCost = i.total > 0 ? ` — $${i.total.toFixed(2)}` : '';
-    return `> **${i.qty}×** ${i.name}${lineCost}`;
-  }).join('\n');
+  const itemList = Array.isArray(logEntry.items)
+    ? logEntry.items.map(i => {
+        const lineCost = i.total > 0 ? ` — $${i.total.toFixed(2)}` : '';
+        return `> **${i.qty}×** ${i.name}${lineCost}`;
+      }).join('\n')
+    : String(logEntry.items);
+
   const now = new Date(logEntry.time);
   const timeStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' at ' +
     now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   const totalCost = logEntry.totalCost || 0;
 
-  const payload = {
-    username: 'Yama Supply Hub',
-    avatar_url: 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png',
-    embeds: [{
-      color: 0xe8c547,
-      title: '📦 New Inventory Request',
-      fields: [
-        { name: '🏪 Restaurant', value: logEntry.restaurant, inline: true },
-        { name: '👤 Staff', value: logEntry.staff, inline: true },
-        { name: '🗓️ Date & Time', value: timeStr, inline: false },
-        { name: '📋 Items Taken', value: itemList, inline: false },
-        ...(totalCost > 0 ? [{ name: '💰 Total Supply Cost', value: `$${totalCost.toFixed(2)}`, inline: false }] : []),
-      ],
-      footer: { text: `Yama Supply Hub • ${timeStr}` },
-      image: photoBlob ? { url: 'attachment://photo.jpg' } : undefined
-    }]
-  };
+  const fields = [
+    { name: '🏪 Restaurant', value: logEntry.restaurant, inline: true },
+    { name: '👤 Staff', value: logEntry.staff, inline: true },
+    { name: '🗓️ Date & Time', value: timeStr, inline: false },
+    { name: '📋 Items Taken', value: itemList || '—', inline: false },
+    ...(totalCost > 0 ? [{ name: '💰 Total Supply Cost', value: `$${totalCost.toFixed(2)}`, inline: false }] : []),
+  ];
 
   try {
     if (photoBlobs.length > 0) {
-      const formData = new FormData();
-      // Discord supports up to 10 attachments
       const embeds = [{
         color: 0xe8c547,
         title: '📦 New Inventory Request',
-        fields: [
-          { name: '🏪 Restaurant', value: logEntry.restaurant, inline: true },
-          { name: '👤 Staff', value: logEntry.staff, inline: true },
-          { name: '🗓️ Date & Time', value: timeStr, inline: false },
-          { name: '📋 Items Taken', value: itemList, inline: false },
-          ...(totalCost > 0 ? [{ name: '💰 Total Supply Cost', value: `$${totalCost.toFixed(2)}`, inline: false }] : []),
-        ],
+        fields,
         footer: { text: `Yama Supply Hub • ${timeStr}` },
         image: { url: 'attachment://photo_1.jpg' }
       }];
-
-      // Add extra image embeds for additional photos
       photoBlobs.slice(1).forEach((_, i) => {
         embeds.push({ image: { url: `attachment://photo_${i+2}.jpg` }, color: 0xe8c547 });
       });
-
-      const payload = { username: 'Yama Supply Hub', avatar_url: 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png', embeds };
-      formData.append('payload_json', JSON.stringify(payload));
+      const formData = new FormData();
+      formData.append('payload_json', JSON.stringify({ username: 'Yama Supply Hub', avatar_url: 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png', embeds }));
       photoBlobs.forEach((blob, i) => formData.append(`files[${i}]`, blob, `photo_${i+1}.jpg`));
       await fetch(DISCORD_WEBHOOK, { method: 'POST', body: formData });
     } else {
       const payload = {
         username: 'Yama Supply Hub',
         avatar_url: 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png',
-        embeds: [{
-          color: 0xe8c547,
-          title: '📦 New Inventory Request',
-          fields: [
-            { name: '🏪 Restaurant', value: logEntry.restaurant, inline: true },
-            { name: '👤 Staff', value: logEntry.staff, inline: true },
-            { name: '🗓️ Date & Time', value: timeStr, inline: false },
-            { name: '📋 Items Taken', value: itemList, inline: false },
-            ...(totalCost > 0 ? [{ name: '💰 Total Supply Cost', value: `$${totalCost.toFixed(2)}`, inline: false }] : []),
-          ],
-          footer: { text: `Yama Supply Hub • ${timeStr}` }
-        }]
+        embeds: [{ color: 0xe8c547, title: '📦 New Inventory Request', fields, footer: { text: `Yama Supply Hub • ${timeStr}` } }]
       };
       await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     }
