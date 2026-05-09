@@ -950,17 +950,19 @@
 
   <!-- Step 4 - Photo -->
   <div class="form-card" style="max-width:760px;margin:0 auto 1.5rem;">
-    <div class="form-section-title">Step 4 — Take a Photo of Items</div>
-    <p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;">Take a clear photo of the items you are taking from the shelf. This is required before submitting.</p>
-    <label id="photoLabel" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.75rem;border:2px dashed var(--border);border-radius:10px;padding:2rem;cursor:pointer;transition:border-color 0.2s;">
-      <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(this)" />
-      <div id="photoPlaceholder" style="text-align:center">
-        <div style="font-size:2.5rem">📷</div>
-        <div style="font-size:0.82rem;color:var(--muted);margin-top:0.5rem">Tap to take a photo or upload</div>
-      </div>
-      <img id="photoPreview" style="display:none;max-width:100%;max-height:260px;border-radius:8px;object-fit:contain;" />
+    <div class="form-section-title">Step 4 — Take Photos of Items</div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;">Take clear photos of the items you are taking. At least 1 photo is required. You can add up to 5 photos.</p>
+
+    <!-- Photo previews grid -->
+    <div id="photoPreviews" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.75rem;margin-bottom:1rem;"></div>
+
+    <!-- Add photo button -->
+    <label id="photoLabel" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;border:2px dashed var(--border);border-radius:10px;padding:1rem;cursor:pointer;transition:border-color 0.2s;" id="addPhotoBtn">
+      <input type="file" id="photoInput" accept="image/*" capture="environment" multiple style="display:none" onchange="handlePhotoUpload(this)" />
+      <div style="font-size:1.5rem">📷</div>
+      <div style="font-size:0.82rem;color:var(--muted)">Tap to add photo(s)</div>
     </label>
-    <div id="photoError" style="display:none;color:var(--red);font-size:0.75rem;margin-top:0.5rem;">⚠ Photo is required before submitting.</div>
+    <div id="photoError" style="display:none;color:var(--red);font-size:0.75rem;margin-top:0.5rem;">⚠ At least 1 photo is required before submitting.</div>
   </div>
 
   <!-- Submit -->
@@ -1366,7 +1368,7 @@ function changeQty(id, delta) {
   const item = state.items.find(i => i.id === id);
   if (!item) return;
   const current = quantities[id] || 0;
-  const newVal = Math.max(0, Math.min(item.stock, current + delta));
+  const newVal = Math.max(0, current + delta);
   quantities[id] = newVal;
   const input = document.getElementById(`qty-${id}`);
   if (input) input.value = newVal;
@@ -1376,7 +1378,7 @@ function changeQty(id, delta) {
 function setQty(id, val) {
   const item = state.items.find(i => i.id === id);
   if (!item) return;
-  quantities[id] = Math.max(0, Math.min(item.stock, parseInt(val) || 0));
+  quantities[id] = Math.max(0, parseInt(val) || 0);
   updateItemRowState(id);
 }
 
@@ -1413,8 +1415,8 @@ function submitRequest() {
   const taken = Object.entries(quantities).filter(([id, qty]) => qty > 0);
   if (taken.length === 0) { showToast('Please select at least one item!', true); return; }
 
-  // Require photo
-  if (!photoBlob) {
+  // Require at least 1 photo
+  if (photoBlobs.length === 0) {
     document.getElementById('photoError').style.display = 'block';
     document.getElementById('photoLabel').scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
@@ -1496,13 +1498,11 @@ function submitRequest() {
   document.querySelectorAll('.starting-stock-input').forEach(i => { i.value = ''; i.classList.remove('error','ok'); });
   selectedRestaurant = '';
 
-  // Reset photo
-  photoBlob = null;
+  // Reset photos
+  photoBlobs = [];
   document.getElementById('photoInput').value = '';
-  document.getElementById('photoPreview').style.display = 'none';
-  document.getElementById('photoPreview').src = '';
-  document.getElementById('photoPlaceholder').style.display = 'block';
-  document.getElementById('photoLabel').style.borderColor = 'var(--border)';
+  document.getElementById('photoPreviews').innerHTML = '';
+  document.getElementById('photoLabel').style.display = 'flex';
 
   renderItemsList();
   showToast(`✓ Request submitted for ${logEntry.restaurant}`);
@@ -2180,39 +2180,59 @@ async function sendMismatchAlert(staff, restaurant, mismatches) {
   }
 }
 
-let photoBlob = null;
+let photoBlobs = [];
 
 function handlePhotoUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
+  const files = Array.from(input.files);
+  if (!files.length) return;
 
-  // Compress image before storing
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      const canvas = document.createElement('canvas');
-      const MAX = 1200;
-      let w = img.width, h = img.height;
-      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
-      if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      canvas.toBlob(blob => {
-        photoBlob = blob;
-        const preview = document.getElementById('photoPreview');
-        const placeholder = document.getElementById('photoPlaceholder');
-        const label = document.getElementById('photoLabel');
-        preview.src = URL.createObjectURL(blob);
-        preview.style.display = 'block';
-        placeholder.style.display = 'none';
-        label.style.borderColor = 'var(--accent)';
-        document.getElementById('photoError').style.display = 'none';
-      }, 'image/jpeg', 0.8);
+  const remaining = 5 - photoBlobs.length;
+  const toProcess = files.slice(0, remaining);
+
+  toProcess.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => {
+          photoBlobs.push(blob);
+          renderPhotoPreviews();
+          document.getElementById('photoError').style.display = 'none';
+          // Hide add button if 5 photos reached
+          document.getElementById('photoLabel').style.display = photoBlobs.length >= 5 ? 'none' : 'flex';
+        }, 'image/jpeg', 0.8);
+      };
+      img.src = e.target.result;
     };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
+  });
+
+  // Reset input so same file can be re-selected
+  input.value = '';
+}
+
+function renderPhotoPreviews() {
+  const container = document.getElementById('photoPreviews');
+  container.innerHTML = photoBlobs.map((blob, i) => `
+    <div style="position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1;background:var(--surface2);">
+      <img src="${URL.createObjectURL(blob)}" style="width:100%;height:100%;object-fit:cover;" />
+      <button onclick="removePhoto(${i})" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.7);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.75rem;display:flex;align-items:center;justify-content:center;">✕</button>
+      <div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:4px;">Photo ${i+1}</div>
+    </div>
+  `).join('');
+}
+
+function removePhoto(index) {
+  photoBlobs.splice(index, 1);
+  renderPhotoPreviews();
+  document.getElementById('photoLabel').style.display = photoBlobs.length >= 5 ? 'none' : 'flex';
 }
 
 async function sendToDiscord(logEntry) {
@@ -2244,18 +2264,50 @@ async function sendToDiscord(logEntry) {
   };
 
   try {
-    if (photoBlob) {
-      // Send as multipart with photo attachment
+    if (photoBlobs.length > 0) {
       const formData = new FormData();
+      // Discord supports up to 10 attachments
+      const embeds = [{
+        color: 0xe8c547,
+        title: '📦 New Inventory Request',
+        fields: [
+          { name: '🏪 Restaurant', value: logEntry.restaurant, inline: true },
+          { name: '👤 Staff', value: logEntry.staff, inline: true },
+          { name: '🗓️ Date & Time', value: timeStr, inline: false },
+          { name: '📋 Items Taken', value: itemList, inline: false },
+          ...(totalCost > 0 ? [{ name: '💰 Total Supply Cost', value: `$${totalCost.toFixed(2)}`, inline: false }] : []),
+        ],
+        footer: { text: `Yama Supply Hub • ${timeStr}` },
+        image: { url: 'attachment://photo_1.jpg' }
+      }];
+
+      // Add extra image embeds for additional photos
+      photoBlobs.slice(1).forEach((_, i) => {
+        embeds.push({ image: { url: `attachment://photo_${i+2}.jpg` }, color: 0xe8c547 });
+      });
+
+      const payload = { username: 'Yama Supply Hub', avatar_url: 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png', embeds };
       formData.append('payload_json', JSON.stringify(payload));
-      formData.append('files[0]', photoBlob, 'photo.jpg');
+      photoBlobs.forEach((blob, i) => formData.append(`files[${i}]`, blob, `photo_${i+1}.jpg`));
       await fetch(DISCORD_WEBHOOK, { method: 'POST', body: formData });
     } else {
-      await fetch(DISCORD_WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const payload = {
+        username: 'Yama Supply Hub',
+        avatar_url: 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png',
+        embeds: [{
+          color: 0xe8c547,
+          title: '📦 New Inventory Request',
+          fields: [
+            { name: '🏪 Restaurant', value: logEntry.restaurant, inline: true },
+            { name: '👤 Staff', value: logEntry.staff, inline: true },
+            { name: '🗓️ Date & Time', value: timeStr, inline: false },
+            { name: '📋 Items Taken', value: itemList, inline: false },
+            ...(totalCost > 0 ? [{ name: '💰 Total Supply Cost', value: `$${totalCost.toFixed(2)}`, inline: false }] : []),
+          ],
+          footer: { text: `Yama Supply Hub • ${timeStr}` }
+        }]
+      };
+      await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     }
   } catch (e) {
     console.warn('Discord notification failed:', e);
