@@ -850,7 +850,10 @@
 
   /* STARTING STOCK */
   .item-row.has-qty { background: rgba(232,197,71,0.03); border-left: 2px solid var(--accent); }
-  .item-row.mismatch { background: rgba(248,113,113,0.06); border-left: 2px solid var(--red); }
+  .item-row.preselected-item {
+    border: 2px solid var(--accent);
+    background: rgba(232,197,71,0.06);
+  }
   .starting-stock-input {
     width: 100%;
     background: var(--surface2);
@@ -1199,18 +1202,6 @@
   </div>
 </div>
 
-<!-- MISMATCH WARNING MODAL -->
-<div class="modal-overlay" id="mismatchModal">
-  <div class="modal" style="width:460px">
-    <div style="font-size:2rem;margin-bottom:0.75rem">⚠️</div>
-    <h2 style="color:var(--red)">Stock Count Mismatch</h2>
-    <p>Your request was submitted, but the following items had a count that didn't match the last recorded stock. An alert has been sent to the manager.</p>
-    <div id="mismatchList" style="margin:1rem 0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.75rem;font-size:0.82rem;line-height:1.8;"></div>
-    <p style="color:var(--red);font-size:0.82rem;font-weight:600;margin-bottom:0.5rem;">Please notify Milee or Nickel right away regarding this matter.</p>
-    <button class="modal-btn" style="background:var(--red)" onclick="closeModal('mismatchModal')">I Understand</button>
-  </div>
-</div>
-
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1308,6 +1299,16 @@ async function syncInventoryToSheets() {
 // ============================================================
 let selectedRestaurant = '';
 let quantities = {};
+let preselectedItemId = null;
+
+function checkQRPreselect() {
+  const params = new URLSearchParams(window.location.search);
+  const itemId = parseInt(params.get('item'));
+  if (itemId) {
+    preselectedItemId = itemId;
+    quantities[itemId] = 0;
+  }
+}
 
 function selectRestaurant(btn, name) {
   document.querySelectorAll('.rest-btn').forEach(b => b.classList.remove('selected'));
@@ -1331,10 +1332,11 @@ function renderItemsList(filter = '') {
   container.innerHTML = filtered.map(item => {
     const qty = quantities[item.id] || 0;
     const hasQty = qty > 0;
+    const isPreselected = item.id === preselectedItemId;
     return `
-      <div class="item-row ${hasQty ? 'has-qty' : ''}" id="itemrow-${item.id}">
+      <div class="item-row ${hasQty ? 'has-qty' : ''} ${isPreselected ? 'preselected-item' : ''}" id="itemrow-${item.id}">
         <div style="flex:1">
-          <div class="item-name">${item.name}</div>
+          <div class="item-name">${item.name}${isPreselected ? ' <span style="font-size:0.65rem;background:var(--accent);color:#000;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">QR</span>' : ''}</div>
           <div style="font-size:0.7rem;color:var(--muted);margin-top:2px">${item.category}</div>
         </div>
         <div class="qty-control">
@@ -1343,17 +1345,6 @@ function renderItemsList(filter = '') {
             onchange="setQty(${item.id}, this.value)" />
           <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
         </div>
-        ${hasQty ? `
-        <div style="width:100%;margin-top:0.6rem;background:var(--surface2);border:1.5px solid var(--accent);border-radius:8px;padding:0.6rem 0.75rem;">
-          <div style="font-size:0.7rem;color:var(--accent);font-weight:600;margin-bottom:0.4rem;">
-            📋 Before taking — how many boxes are on the shelf RIGHT NOW?
-          </div>
-          <input class="starting-stock-input" type="number" min="0"
-            id="startstock-${item.id}"
-            placeholder="Enter shelf count here"
-            oninput="verifyStartingStock(${item.id})"
-            style="width:100%;font-size:0.85rem;padding:0.5rem 0.75rem;" />
-        </div>` : ''}
       </div>
     `;
   }).join('');
@@ -1381,43 +1372,8 @@ function updateItemRowState(id) {
   const qty = quantities[id] || 0;
   const row = document.getElementById(`itemrow-${id}`);
   if (!row) return;
-
-  if (qty > 0) {
-    row.classList.add('has-qty');
-    // Show count box if not already there
-    if (!document.getElementById(`startstock-${id}`)) {
-      const countBox = document.createElement('div');
-      countBox.style.cssText = 'width:100%;margin-top:0.6rem;background:var(--surface2);border:1.5px solid var(--accent);border-radius:8px;padding:0.6rem 0.75rem;';
-      countBox.innerHTML = `
-        <div style="font-size:0.7rem;color:var(--accent);font-weight:600;margin-bottom:0.4rem;">
-          📋 Before taking — how many boxes are on the shelf RIGHT NOW?
-        </div>
-        <input class="starting-stock-input" type="number" min="0"
-          id="startstock-${id}"
-          placeholder="Enter shelf count here"
-          oninput="verifyStartingStock(${id})"
-          style="width:100%;font-size:0.85rem;padding:0.5rem 0.75rem;" />
-      `;
-      row.appendChild(countBox);
-    }
-  } else {
-    row.classList.remove('has-qty', 'mismatch');
-    // Remove count box
-    const existing = document.getElementById(`startstock-${id}`);
-    if (existing) existing.closest('div[style*="border:1.5px"]')?.remove();
-  }
-  verifyStartingStock(id);
-}
-
-function verifyStartingStock(id) {
-  const item = state.items.find(i => i.id === id);
-  if (!item) return;
-  const input = document.getElementById(`startstock-${id}`);
-  if (!input) return;
-  // Just remove error state as they type — no live feedback
-  input.classList.remove('error');
-  const row = document.getElementById(`itemrow-${id}`);
-  if (row) row.classList.remove('mismatch');
+  if (qty > 0) row.classList.add('has-qty');
+  else row.classList.remove('has-qty');
 }
 
 function submitRequest() {
@@ -1432,31 +1388,6 @@ function submitRequest() {
   if (photoBlobs.length === 0) {
     document.getElementById('photoError').style.display = 'block';
     document.getElementById('photoLabel').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  }
-
-  // Check starting stock - collect mismatches but don't block
-  const mismatches = [];
-  let unfilledCount = 0;
-  taken.forEach(([id]) => {
-    const item = state.items.find(i => i.id === parseInt(id));
-    if (!item) return;
-    const input = document.getElementById(`startstock-${id}`);
-    const entered = input ? input.value.trim() : '';
-    if (entered === '') {
-      unfilledCount++;
-      if (input) input.classList.add('error');
-    } else if (parseInt(entered) !== parseInt(item.stock)) {
-      mismatches.push({
-        name: item.name,
-        entered: parseInt(entered),
-        actual: parseInt(item.stock)
-      });
-    }
-  });
-
-  if (unfilledCount > 0) {
-    showToast(`Please count & fill starting stock for all items!`, true);
     return;
   }
 
@@ -1495,21 +1426,12 @@ function submitRequest() {
   // Send to Discord
   sendToDiscord(logEntry);
 
-  // Handle mismatches — show popup + send Discord warning
-  if (mismatches.length > 0) {
-    document.getElementById('mismatchList').innerHTML = mismatches.map(m =>
-      `<div>• <strong>${m.name}</strong> — count doesn't match the last recorded stock</div>`
-    ).join('');
-    openModal('mismatchModal');
-    sendMismatchAlert(staffName, selectedRestaurant, mismatches);
-  }
-
   // Reset
   quantities = {};
   document.getElementById('staffName').value = '';
   document.querySelectorAll('.rest-btn').forEach(b => b.classList.remove('selected'));
-  document.querySelectorAll('.starting-stock-input').forEach(i => { i.value = ''; i.classList.remove('error','ok'); });
   selectedRestaurant = '';
+  preselectedItemId = null;
 
   // Reset photos
   photoBlobs = [];
@@ -2157,46 +2079,6 @@ function connectGoogleSheets() {
   showToast('✓ Google Sheets connected!');
 }
 
-async function sendMismatchAlert(staff, restaurant, mismatches) {
-  const mismatchList = mismatches.map(m =>
-    `> ⚠ **${m.name}** — counted **${m.entered}**, system has **${m.actual}**`
-  ).join('\n');
-
-  const now = new Date();
-  const timeStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' at ' +
-    now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-  const mentions = '<@536508015075917824> <@243790481501323274> <@1391215530886828177> <@1416896032855298118>';
-
-  const payload = {
-    content: mentions,
-    username: 'Yama Supply Hub',
-    avatar_url: 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png',
-    embeds: [{
-      color: 0xff6b4a,
-      title: '🚨 Stock Count Mismatch Detected',
-      description: 'A submission was made with a starting stock count that does not match the system. Please investigate.',
-      fields: [
-        { name: '🏪 Restaurant', value: restaurant, inline: true },
-        { name: '👤 Staff', value: staff, inline: true },
-        { name: '🗓️ Time', value: timeStr, inline: false },
-        { name: '⚠ Mismatched Items', value: mismatchList, inline: false },
-      ],
-      footer: { text: 'Yama Supply Hub — Stock Verification Alert' }
-    }]
-  };
-
-  try {
-    await fetch(DISCORD_WEBHOOK, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  } catch (e) {
-    console.warn('Discord mismatch alert failed:', e);
-  }
-}
-
 let photoBlobs = [];
 
 function handlePhotoUpload(input) {
@@ -2450,7 +2332,15 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 // ============================================================
 // INIT
 // ============================================================
-fetchInventoryFromSheets();
+checkQRPreselect();
+fetchInventoryFromSheets().then(() => {
+  if (preselectedItemId) {
+    setTimeout(() => {
+      const el = document.getElementById(`itemrow-${preselectedItemId}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 600);
+  }
+});
 </script>
 </body>
 </html>
