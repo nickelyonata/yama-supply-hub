@@ -1259,7 +1259,6 @@ function validateStep(step) {
     if (!document.querySelector('input[name="tamcard"]:checked')) { alert(t.alertRequired); return false; }
     if (!sigs.A.hasData) { alert(t.alertSig); return false; }
   }
-  }
   if (step === 1) {
     if (!document.getElementById('w4-file').files.length) {
       alert('Please upload your completed and signed W-4 before continuing.');
