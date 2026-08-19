@@ -1156,8 +1156,15 @@ function toggleNestForm() {
   const body = document.getElementById('nest-form-body');
   const showing = (choice && choice.value === 'yes');
   if (body) body.style.display = showing ? 'block' : 'none';
-  // Init NEST signature pad AFTER the canvas is visible
-  if (showing) setTimeout(() => initOneSig('NEST'), 80);
+  if (showing) {
+    // Force full re-init — canvas was 0x0 when section was hidden
+    setTimeout(() => {
+      sigs.NEST.canvas = null;
+      sigs.NEST.ctx = null;
+      sigs.NEST.hasData = false;
+      initOneSig('NEST');
+    }, 80);
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1464,7 +1471,7 @@ async function submitForm() {
 //  SIGNATURE PAD
 // ══════════════════════════════════════════════════════════════
 // Map step index → which signature pad lives on that step
-const STEP_SIGS = { 0: 'A', 3: 'D', 5: 'NEST' };
+const STEP_SIGS = { 0: 'A', 3: 'D' }; // NEST inits in toggleNestForm
 
 function initSignatures() {
   initOneSig('A');
