@@ -1154,7 +1154,10 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleNestForm() {
   const choice = document.querySelector('input[name="nest-choice"]:checked');
   const body = document.getElementById('nest-form-body');
-  if (body) body.style.display = (choice && choice.value === 'yes') ? 'block' : 'none';
+  const showing = (choice && choice.value === 'yes');
+  if (body) body.style.display = showing ? 'block' : 'none';
+  // Init NEST signature pad AFTER the canvas is visible
+  if (showing) setTimeout(() => initOneSig('NEST'), 80);
 }
 
 // ══════════════════════════════════════════════════════════════
