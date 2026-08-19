@@ -1157,13 +1157,25 @@ function toggleNestForm() {
   const showing = (choice && choice.value === 'yes');
   if (body) body.style.display = showing ? 'block' : 'none';
   if (showing) {
-    // Force full re-init — canvas was 0x0 when section was hidden
-    setTimeout(() => {
-      sigs.NEST.canvas = null;
-      sigs.NEST.ctx = null;
-      sigs.NEST.hasData = false;
-      initOneSig('NEST');
-    }, 80);
+    // Reset NEST sig state
+    sigs.NEST.canvas = null;
+    sigs.NEST.ctx = null;
+    sigs.NEST.hasData = false;
+    // Keep retrying until canvas has real dimensions (browser may need time to render)
+    let attempts = 0;
+    const tryInit = () => {
+      const canvas = document.getElementById('sigCanvas-NEST');
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width > 10) {
+        // Canvas is properly sized — safe to initialize
+        initOneSig('NEST');
+      } else if (attempts < 15) {
+        attempts++;
+        setTimeout(tryInit, 80);
+      }
+    };
+    setTimeout(tryInit, 50);
   }
 }
 
@@ -1511,13 +1523,18 @@ function getPos(e, id, type) {
 }
 
 function startDraw(e, id, type) {
+  const c = sigs[id].canvas;
+  if (!c || c.width < 10) return; // Canvas not properly sized yet
   sigs[id].drawing = true;
   const p = getPos(e,id,type);
   sigs[id].ctx.beginPath(); sigs[id].ctx.moveTo(p.x, p.y);
-  document.getElementById('sig-overlay-'+id).style.opacity = '0';
+  const overlay = document.getElementById('sig-overlay-'+id);
+  if (overlay) overlay.style.opacity = '0';
 }
 function draw(e, id, type) {
   if (!sigs[id].drawing) return;
+  const c = sigs[id].canvas;
+  if (!c || c.width < 10) return; // Ignore if canvas not properly sized
   const p = getPos(e,id,type);
   sigs[id].ctx.lineTo(p.x, p.y); sigs[id].ctx.stroke();
   sigs[id].hasData = true;
