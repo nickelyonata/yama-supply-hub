@@ -740,7 +740,7 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2_LR3D-q7KCe3
 const T = {
   en: {
     headerSub: 'Complete all sections below',
-    pillLabels: ['A. Info', 'B. W-4', 'C. I-9', 'D. Documents'],
+    pillLabels: ['A. Info', 'B. W-4', 'C. I-9', 'D. Documents', 'E. Handbook', 'F. NEST'],
     titleA: 'A. Employee Information', subA: 'Please fill in your personal details accurately',
     lblFirst: 'First Name', lblLast: 'Last Name', lblMI: 'Middle Initial',
     lblStreet: 'Street Address', lblApt: 'Apartment / Unit #',
@@ -809,7 +809,7 @@ const T = {
   },
   es: {
     headerSub: 'Complete todas las secciones a continuación',
-    pillLabels: ['A. Info', 'B. W-4', 'C. I-9', 'D. Documentos'],
+    pillLabels: ['A. Info', 'B. W-4', 'C. I-9', 'D. Documentos', 'E. Manual', 'F. NEST'],
     titleA: 'A. Información del Empleado', subA: 'Por favor complete sus datos personales con precisión',
     lblFirst: 'Nombre', lblLast: 'Apellido', lblMI: 'Inicial del segundo nombre',
     lblStreet: 'Dirección', lblApt: 'Apt / Unidad #',
@@ -878,7 +878,7 @@ const T = {
   },
   ko: {
     headerSub: '아래의 모든 섹션을 작성해 주세요',
-    pillLabels: ['A. 정보', 'B. W-4', 'C. I-9', 'D. 서류'],
+    pillLabels: ['A. 정보', 'B. W-4', 'C. I-9', 'D. 서류', 'E. 핸드북', 'F. NEST'],
     titleA: 'A. 직원 정보', subA: '개인 정보를 정확하게 입력해 주세요',
     lblFirst: '이름', lblLast: '성', lblMI: '중간 이름 이니셜',
     lblStreet: '주소', lblApt: '아파트 / 호수',
@@ -973,7 +973,7 @@ function selectLang(l) {
 function applyTranslations() {
   const t = T[lang];
   setText('header-sub', t.headerSub);
-  [0,1,2,3].forEach(i => setText('pill-label-'+i, t.pillLabels[i]));
+  [0,1,2,3,4,5].forEach(i => setText('pill-label-'+i, t.pillLabels[i]));
   setText('title-A', t.titleA); setText('sub-A', t.subA);
   setText('lbl-first', t.lblFirst + ' *'); setText('lbl-last', t.lblLast + ' *'); setText('lbl-mi', t.lblMI);
   setText('lbl-street', t.lblStreet + ' *'); setText('lbl-apt', t.lblApt);
@@ -1003,8 +1003,7 @@ function applyTranslations() {
   setText('btn-back-4', t.btnBack); setText('btn-back-5', t.btnBack);
   setText('btn-submit', t.btnSubmit);
   setText('overlay-title', t.overlayTitle); setText('overlay-sub', t.overlaySub);
-  // Pills E and F
-  setText('pill-label-4', t.pillLabelE); setText('pill-label-5', t.pillLabelF);
+  // Pills handled by pillLabels array above
   // Section E
   setText('title-E', t.titleE); setText('sub-E', t.subE);
   setText('handbook-note', t.handbookNote);
