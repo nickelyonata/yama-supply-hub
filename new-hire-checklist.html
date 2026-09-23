@@ -204,6 +204,22 @@
   .success-folder { margin: 1.5rem auto; display: inline-block; padding: 0.7rem 1.5rem; background: #fef9f0; border: 1.5px solid var(--gold); border-radius: 6px; font-size: 0.85rem; color: var(--warm-brown); text-decoration: none; font-weight: 700; }
   .success-folder:hover { background: #fdecc4; }
 
+  /* ── ARBITRATION SUMMARY BOX ── */
+  .arb-summary-box {
+    border: 1.5px solid var(--border); border-radius: 8px;
+    overflow: hidden; margin: 1rem 0;
+  }
+  .arb-summary-title {
+    background: linear-gradient(135deg, #5c3d2e, #7a4f30);
+    color: var(--gold-light); font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 600; padding: 0.8rem 1.2rem;
+  }
+  .arb-summary-body {
+    padding: 1.2rem; background: #fffdf9; font-size: 0.88rem;
+    color: var(--text); line-height: 1.6;
+  }
+  .arb-summary-body p { margin: 0; }
+
   /* ── HANDBOOK EMBED ── */
   .handbook-embed-wrap { margin: 1rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }
   .handbook-embed-wrap iframe { display: block; min-height: 580px; }
@@ -222,8 +238,26 @@
   .match-hint.no-match { color: var(--error); }
   .match-hint.no-match::before { content: '✗ Does not match'; }
 
+  /* ── AVAILABILITY GRID ── */
+  .avail-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 0.4rem; margin-top: 0.5rem;
+  }
+  .avail-header {
+    font-size: 0.75rem; font-weight: 700; text-align: center;
+    color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px;
+    padding-bottom: 0.2rem;
+  }
+  .avail-grid input {
+    font-size: 0.72rem; padding: 0.4rem 0.3rem; text-align: center;
+    border: 1.5px solid var(--border); border-radius: 4px;
+    background: #fdfaf6; color: var(--text); width: 100%;
+  }
+  .avail-grid input:focus { outline: none; border-color: var(--gold); }
+
   @media (max-width: 600px) {
     .field-row.cols-2, .field-row.cols-3 { grid-template-columns: 1fr; }
+    .avail-grid { grid-template-columns: repeat(4, 1fr); }
     main { padding: 1.5rem 1rem 3rem; }
     .section-body { padding: 1.2rem; }
   }
@@ -296,6 +330,7 @@
       <div class="step-pill" id="pill-3"><span id="pill-label-3">D. Documents</span></div>
       <div class="step-pill" id="pill-4"><span id="pill-label-4">E. Handbook</span></div>
       <div class="step-pill" id="pill-5"><span id="pill-label-5">F. NEST</span></div>
+      <div class="step-pill" id="pill-6"><span id="pill-label-6">G. Agreement</span></div>
     </div>
   </div>
 
@@ -412,6 +447,75 @@
               <div class="upload-text"><strong id="upload-tam-label">Upload TAM Card</strong><span id="upload-tam-sub">Click to browse or drag & drop</span></div>
               <div class="file-preview" id="tamcard-name"></div>
             </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Employment Type -->
+        <div class="field" style="margin-bottom:1.2rem">
+          <label id="lbl-emptype">Employment Type <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="emptype" value="fulltime" /><span id="emptype-full">Full Time (30–40 hours/week)</span></label>
+            <label class="radio-opt"><input type="radio" name="emptype" value="parttime" /><span id="emptype-part">Part Time (0–29 hours/week)</span></label>
+          </div>
+        </div>
+
+        <!-- Availability Grid -->
+        <div class="field" style="margin-bottom:1.2rem">
+          <label id="lbl-avail">Hours Available to Work</label>
+          <div class="avail-grid">
+            <div class="avail-header" id="avail-mon">Mon</div>
+            <div class="avail-header" id="avail-tue">Tue</div>
+            <div class="avail-header" id="avail-wed">Wed</div>
+            <div class="avail-header" id="avail-thu">Thu</div>
+            <div class="avail-header" id="avail-fri">Fri</div>
+            <div class="avail-header" id="avail-sat">Sat</div>
+            <div class="avail-header" id="avail-sun">Sun</div>
+            <input type="text" id="avail-mon-val" placeholder="e.g. 9am–5pm" />
+            <input type="text" id="avail-tue-val" placeholder="e.g. 9am–5pm" />
+            <input type="text" id="avail-wed-val" placeholder="e.g. 9am–5pm" />
+            <input type="text" id="avail-thu-val" placeholder="e.g. 9am–5pm" />
+            <input type="text" id="avail-fri-val" placeholder="e.g. 9am–5pm" />
+            <input type="text" id="avail-sat-val" placeholder="e.g. 9am–5pm" />
+            <input type="text" id="avail-sun-val" placeholder="e.g. 9am–5pm" />
+          </div>
+        </div>
+
+        <!-- Age 18+ -->
+        <div class="field" style="margin-bottom:1.2rem">
+          <label id="lbl-age18">Are you 18 years of age or older? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="age18" value="yes" /><span id="age18-yes">Yes</span></label>
+            <label class="radio-opt"><input type="radio" name="age18" value="no"  /><span id="age18-no">No</span></label>
+          </div>
+        </div>
+
+        <!-- Previous Yama Employment -->
+        <div class="field" style="margin-bottom:1.2rem">
+          <label id="lbl-prevyama">Have you ever been employed by Yama Sushi? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="prevyama" value="yes" onchange="togglePrevYama(true)"  /><span id="prevyama-yes">Yes</span></label>
+            <label class="radio-opt"><input type="radio" name="prevyama" value="no"  onchange="togglePrevYama(false)" /><span id="prevyama-no">No</span></label>
+          </div>
+          <div id="prevyama-fields" style="display:none;margin-top:0.8rem">
+            <div class="field-row cols-3">
+              <div class="field"><label id="lbl-prevyama-loc">Location</label><input type="text" id="prevyama-location" placeholder="e.g. Spring Mountain" /></div>
+              <div class="field"><label id="lbl-prevyama-from">From</label><input type="date" id="prevyama-from" /></div>
+              <div class="field"><label id="lbl-prevyama-to">To</label><input type="date" id="prevyama-to" /></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Felony -->
+        <div class="field" style="margin-bottom:1.2rem">
+          <label id="lbl-felony">Have you ever been convicted of a felony? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="felony" value="yes" onchange="toggleFelony(true)"  /><span id="felony-yes">Yes</span></label>
+            <label class="radio-opt"><input type="radio" name="felony" value="no"  onchange="toggleFelony(false)" /><span id="felony-no">No</span></label>
+          </div>
+          <div id="felony-fields" style="display:none;margin-top:0.8rem">
+            <div class="field"><label id="lbl-felony-explain">If yes, explain:</label><input type="text" id="felony-explain" placeholder="Please explain..." /></div>
           </div>
         </div>
 
@@ -711,6 +815,59 @@
 
         <div class="nav-row">
           <button class="btn-back" onclick="prevStep(5)" id="btn-back-5">← Back</button>
+          <button class="btn-next" onclick="nextStep(5)" id="btn-next-5">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SECTION G: ARBITRATION AGREEMENT ══ -->
+    <div class="section-card" id="section-6">
+      <div class="section-header">
+        <div class="section-icon">⚖️</div>
+        <div>
+          <div class="section-title" id="title-G">G. Mutual Arbitration Agreement</div>
+          <div class="section-subtitle" id="sub-G">Please read and sign the agreement below</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="info-note"><span>⚠️</span><div id="arb-note">This agreement requires both you and the Company to resolve any employment disputes through binding arbitration. Please read carefully. You may consult your own private legal counsel before signing.</div></div>
+
+        <div class="arb-summary-box">
+          <div class="arb-summary-title" id="arb-title">Mutual Arbitration Agreement Summary</div>
+          <div class="arb-summary-body" id="arb-body">
+            <p>This Agreement is between you and <strong>KIMCHI LAS VEGAS INC, LLCK INC, CHUNG AND KLL INC, YAMA CHEYENNE LLC, AND YAMA FREMONT LLC</strong> (collectively "Company").</p>
+            <p style="margin-top:0.8rem"><strong>What this means:</strong> Both you and the Company agree to resolve any covered disputes through binding arbitration — not in court or as a class action. This includes claims related to your employment, separation, and any other association with the Company.</p>
+            <p style="margin-top:0.8rem"><strong>What is excluded:</strong> Workers' compensation claims, unemployment benefits, and certain emergency court relief are excluded.</p>
+            <p style="margin-top:0.8rem"><strong>Class Action Waiver:</strong> You and the Company agree to bring any claim on an individual basis only — not as a class or collective action.</p>
+            <p style="margin-top:0.8rem"><strong>This is an important legal document that affects your rights. You may consult private legal counsel before signing.</strong></p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="info-note" style="background:#fff8f0;border-color:#e8c97a"><span>📋</span><div id="arb-sign-note">By signing below, I agree to be bound to this Arbitration Agreement. I understand that I and the Company must arbitrate any and all covered disputes and that I am waiving the right to a jury trial or to sue in court.</div></div>
+
+        <div class="field">
+          <label id="lbl-sig-arb">Employee Signature <span class="req">*</span></label>
+          <div class="sig-wrap">
+            <div class="sig-label-overlay" id="sig-overlay-ARB">Sign here with your mouse or finger</div>
+            <canvas class="sig-canvas" id="sigCanvas-ARB"></canvas>
+          </div>
+          <div class="sig-actions"><button class="btn-clear-sig" onclick="clearSig('ARB')" id="btn-clear-ARB">Clear Signature</button></div>
+        </div>
+
+        <div class="field" style="margin-top:1rem">
+          <label id="lbl-arb-name">Printed Name <span class="req">*</span></label>
+          <input type="text" id="arb-name" placeholder="Type your full legal name" />
+        </div>
+
+        <div class="field" style="margin-top:1rem">
+          <label id="lbl-arb-date">Date Signed</label>
+          <div class="date-display">📅 <span id="arb-date"></span></div>
+        </div>
+
+        <div class="nav-row">
+          <button class="btn-back" onclick="prevStep(6)" id="btn-back-6">← Back</button>
           <button class="btn-submit" onclick="submitForm()" id="btn-submit">✓ Submit</button>
         </div>
       </div>
@@ -740,7 +897,7 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxpOtv1Fn24KyMp
 const T = {
   en: {
     headerSub: 'Complete all sections below',
-    pillLabels: ['A. Info', 'B. W-4', 'C. I-9', 'D. Documents', 'E. Handbook', 'F. NEST'],
+    pillLabels: ['A. Info', 'B. W-4', 'C. I-9', 'D. Documents', 'E. Handbook', 'F. NEST', 'G. Agreement'],
     titleA: 'A. Employee Information', subA: 'Please fill in your personal details accurately',
     lblFirst: 'First Name', lblLast: 'Last Name', lblMI: 'Middle Initial',
     lblStreet: 'Street Address', lblApt: 'Apartment / Unit #',
@@ -809,7 +966,7 @@ const T = {
   },
   es: {
     headerSub: 'Complete todas las secciones a continuación',
-    pillLabels: ['A. Info', 'B. W-4', 'C. I-9', 'D. Documentos', 'E. Manual', 'F. NEST'],
+    pillLabels: ['A. Info', 'B. W-4', 'C. I-9', 'D. Documentos', 'E. Manual', 'F. NEST', 'G. Acuerdo'],
     titleA: 'A. Información del Empleado', subA: 'Por favor complete sus datos personales con precisión',
     lblFirst: 'Nombre', lblLast: 'Apellido', lblMI: 'Inicial del segundo nombre',
     lblStreet: 'Dirección', lblApt: 'Apt / Unidad #',
@@ -878,7 +1035,7 @@ const T = {
   },
   ko: {
     headerSub: '아래의 모든 섹션을 작성해 주세요',
-    pillLabels: ['A. 정보', 'B. W-4', 'C. I-9', 'D. 서류', 'E. 핸드북', 'F. NEST'],
+    pillLabels: ['A. 정보', 'B. W-4', 'C. I-9', 'D. 서류', 'E. 핸드북', 'F. NEST', 'G. 계약'],
     titleA: 'A. 직원 정보', subA: '개인 정보를 정확하게 입력해 주세요',
     lblFirst: '이름', lblLast: '성', lblMI: '중간 이름 이니셜',
     lblStreet: '주소', lblApt: '아파트 / 호수',
@@ -955,7 +1112,8 @@ let currentStep = 0;
 const sigs = {
   A:    { canvas: null, ctx: null, drawing: false, hasData: false },
   D:    { canvas: null, ctx: null, drawing: false, hasData: false },
-  NEST: { canvas: null, ctx: null, drawing: false, hasData: false }
+  NEST: { canvas: null, ctx: null, drawing: false, hasData: false },
+  ARB:  { canvas: null, ctx: null, drawing: false, hasData: false },
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -973,7 +1131,7 @@ function selectLang(l) {
 function applyTranslations() {
   const t = T[lang];
   setText('header-sub', t.headerSub);
-  [0,1,2,3,4,5].forEach(i => setText('pill-label-'+i, t.pillLabels[i]));
+  [0,1,2,3,4,5,6].forEach(i => setText('pill-label-'+i, t.pillLabels[i]));
   setText('title-A', t.titleA); setText('sub-A', t.subA);
   setText('lbl-first', t.lblFirst + ' *'); setText('lbl-last', t.lblLast + ' *'); setText('lbl-mi', t.lblMI);
   setText('lbl-street', t.lblStreet + ' *'); setText('lbl-apt', t.lblApt);
@@ -998,9 +1156,9 @@ function applyTranslations() {
   setText('lbl-date', t.lblDate); setText('lbl-sig-final', t.lblSigFinal + ' *');
   setText('sig-overlay-D', t.sigFinalHint); setText('btn-clear-D', t.clearSig);
   setText('btn-next-0', t.btnNext); setText('btn-next-1', t.btnNext); setText('btn-next-2', t.btnNext);
-  setText('btn-next-3', t.btnNext); setText('btn-next-4', t.btnNext);
+  setText('btn-next-3', t.btnNext); setText('btn-next-4', t.btnNext); setText('btn-next-5', t.btnNext);
   setText('btn-back-1', t.btnBack); setText('btn-back-2', t.btnBack); setText('btn-back-3', t.btnBack);
-  setText('btn-back-4', t.btnBack); setText('btn-back-5', t.btnBack);
+  setText('btn-back-4', t.btnBack); setText('btn-back-5', t.btnBack); setText('btn-back-6', t.btnBack);
   setText('btn-submit', t.btnSubmit);
   setText('overlay-title', t.overlayTitle); setText('overlay-sub', t.overlaySub);
   // Pills handled by pillLabels array above
@@ -1150,6 +1308,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+function togglePrevYama(show) {
+  const f = document.getElementById('prevyama-fields');
+  if (f) f.style.display = show ? 'block' : 'none';
+}
+
+function toggleFelony(show) {
+  const f = document.getElementById('felony-fields');
+  if (f) f.style.display = show ? 'block' : 'none';
+}
 
 function toggleNestForm() {
   const choice = document.querySelector('input[name="nest-choice"]:checked');
@@ -1304,6 +1472,10 @@ function validateStep(step) {
       return false;
     }
   }
+  if (step === 5) {
+    const nestChoice = document.querySelector('input[name="nest-choice"]:checked');
+    if (!nestChoice) { alert(t.alertRequired + ' (NEST)'); return false; }
+  }
   return true;
 }
 
@@ -1319,6 +1491,17 @@ async function submitForm() {
   if (!document.getElementById('ssn-file').files.length) { alert(t.alertSSN); return; }
   if (!document.getElementById('dl-file').files.length) { alert(t.alertDL); return; }
   if (!sigs.D.hasData) { alert(t.alertSig); return; }
+
+  // Validate Arbitration Agreement
+  const arbName = document.getElementById('arb-name');
+  if (!arbName || !arbName.value.trim()) {
+    alert('Please type your full name in the Arbitration Agreement section.');
+    return;
+  }
+  if (!sigs.ARB.hasData) {
+    alert('Please sign the Arbitration Agreement before submitting.');
+    return;
+  }
 
   // Validate NEST section
   const nestChoice = document.querySelector('input[name="nest-choice"]:checked');
@@ -1363,7 +1546,7 @@ async function submitForm() {
     }
 
     // Collect signature canvases as PNG
-    const sigMap = { A: 'sigA', D: 'sigD', NEST: 'sigNEST' };
+    const sigMap = { A: 'sigA', D: 'sigD', NEST: 'sigNEST', ARB: 'sigArb' };
     Object.entries(sigMap).forEach(([id, key]) => {
       if (sigs[id] && sigs[id].hasData) {
         const dataUrl = sigs[id].canvas.toDataURL('image/png');
@@ -1387,6 +1570,23 @@ async function submitForm() {
       zip:           document.getElementById('zip').value.trim(),
       phone:         document.getElementById('phone').value.trim(),
       email:         document.getElementById('email').value.trim(),
+      employmentType: (document.querySelector('input[name="emptype"]:checked') || {}).value || '',
+      availability: {
+        mon: document.getElementById('avail-mon-val')?.value.trim() || '',
+        tue: document.getElementById('avail-tue-val')?.value.trim() || '',
+        wed: document.getElementById('avail-wed-val')?.value.trim() || '',
+        thu: document.getElementById('avail-thu-val')?.value.trim() || '',
+        fri: document.getElementById('avail-fri-val')?.value.trim() || '',
+        sat: document.getElementById('avail-sat-val')?.value.trim() || '',
+        sun: document.getElementById('avail-sun-val')?.value.trim() || '',
+      },
+      age18:          (document.querySelector('input[name="age18"]:checked') || {}).value || '',
+      prevYama:       (document.querySelector('input[name="prevyama"]:checked') || {}).value || '',
+      prevYamaLocation: document.getElementById('prevyama-location')?.value.trim() || '',
+      prevYamaFrom:   document.getElementById('prevyama-from')?.value || '',
+      prevYamaTo:     document.getElementById('prevyama-to')?.value   || '',
+      felony:         (document.querySelector('input[name="felony"]:checked') || {}).value || '',
+      felonyExplain:  document.getElementById('felony-explain')?.value.trim() || '',
       position:      pos ? pos.value : '',
       positionOther: document.getElementById('position-other').value.trim(),
       foodCard:      food ? food.value : 'no',
@@ -1483,7 +1683,7 @@ async function submitForm() {
 //  SIGNATURE PAD
 // ══════════════════════════════════════════════════════════════
 // Map step index → which signature pad lives on that step
-const STEP_SIGS = { 0: 'A', 3: 'D' }; // NEST inits in toggleNestForm
+const STEP_SIGS = { 0: 'A', 3: 'D', 6: 'ARB' }; // NEST inits in toggleNestForm
 
 function initSignatures() {
   initOneSig('A');
