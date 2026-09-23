@@ -204,21 +204,25 @@
   .success-folder { margin: 1.5rem auto; display: inline-block; padding: 0.7rem 1.5rem; background: #fef9f0; border: 1.5px solid var(--gold); border-radius: 6px; font-size: 0.85rem; color: var(--warm-brown); text-decoration: none; font-weight: 700; }
   .success-folder:hover { background: #fdecc4; }
 
-  /* ── ARBITRATION SUMMARY BOX ── */
-  .arb-summary-box {
+  /* ── ARBITRATION SCROLLABLE TEXT BOX ── */
+  .arb-scroll-box {
     border: 1.5px solid var(--border); border-radius: 8px;
     overflow: hidden; margin: 1rem 0;
   }
-  .arb-summary-title {
-    background: linear-gradient(135deg, #5c3d2e, #7a4f30);
-    color: var(--gold-light); font-family: 'Playfair Display', serif;
-    font-size: 1rem; font-weight: 600; padding: 0.8rem 1.2rem;
+  .arb-scroll-inner {
+    height: 520px; overflow-y: auto; padding: 1.5rem;
+    background: #fffdf9; font-size: 0.87rem;
+    color: var(--text); line-height: 1.7;
   }
-  .arb-summary-body {
-    padding: 1.2rem; background: #fffdf9; font-size: 0.88rem;
-    color: var(--text); line-height: 1.6;
+  .arb-scroll-inner p { margin-bottom: 0.9rem; }
+  .arb-doc-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; font-weight: 700;
+    color: var(--warm-brown); text-align: center;
+    margin-bottom: 1.2rem; padding-bottom: 0.8rem;
+    border-bottom: 2px solid var(--border);
   }
-  .arb-summary-body p { margin: 0; }
+  .arb-final { text-align: center; margin-top: 1rem; }
 
   /* ── HANDBOOK EMBED ── */
   .handbook-embed-wrap { margin: 1rem 0; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }
@@ -832,13 +836,34 @@
       <div class="section-body">
         <div class="info-note"><span>⚠️</span><div id="arb-note">This agreement requires both you and the Company to resolve any employment disputes through binding arbitration. Please read carefully. You may consult your own private legal counsel before signing.</div></div>
 
-        <div class="handbook-embed-wrap">
-          <iframe id="arb-iframe"
-            src=""
-            width="100%" height="650px"
-            style="border:1px solid var(--border);border-radius:8px;display:block"
-            allowfullscreen>
-          </iframe>
+        <div class="arb-scroll-box">
+          <div class="arb-scroll-inner">
+            <div class="arb-doc-title">MUTUAL ARBITRATION AGREEMENT</div>
+
+            <p><strong>1. Agreement to Arbitrate Disputes.</strong> I agree and acknowledge that "KIMCHI LAS VEGAS INC, LLCK INC, CHUNG AND KLL INC, YAMA CHEYENNE LLC, AND YAMA FREMONT LLC" henceforth referred to as "Company" and I will utilize binding arbitration to resolve any disputes that may arise between us, as set forth more fully in the sections below.</p>
+
+            <p><strong>A.</strong> Company and I mutually agree that any claim, dispute, and/or controversy that either I may have against Company (or its owners, shareholders, parents, subsidiaries, affiliates, directors, officers, managers, employees, agents, or parties affiliated with their employee benefit and health plans) or that Company may have against me, arising from, related to, or having any relationship or connection whatsoever with my seeking employment with, employment by, separation from employment, or any other association with Company shall be submitted to, resolved, and determined exclusively by binding arbitration, which is governed by the Federal Arbitration Act (9 U.S.C. §§1, et seq.) ("FAA") and evidences a commercial transaction, which shall be administered by the American Arbitration Association pursuant to its applicable Rules, which are available on the AAA's website (www.adr.org). In the event of a conflict between AAA's Rules and this Agreement, this Agreement shall govern. To the extent the FAA is inapplicable, this Agreement shall be governed by the arbitration law of the state where I primarily performed services for the Company. Included within the scope of this Agreement are all disputes, whether based on tort, common law, contract, statute (including, but not limited to, any claims of discrimination and harassment, whether they be based on Title VII of the Civil Rights Act of 1964, as amended, or any other similar state, local, or federal law or regulation), equitable law, or otherwise. If the FAA does not apply, this Agreement shall be governed by the arbitration laws of the state of Nevada.</p>
+
+            <p><strong>B.</strong> The following claims are excluded from arbitration: (i) administrative claims by me for workers' compensation or unemployment benefits; (ii) claims for benefits under a Company benefit plan or program that provides its own process for dispute resolution and arbitration of disputes; (iii) claims by Company or me for provisional or emergency relief in court until arbitration can be initiated; (iv) claims that an applicable federal statute expressly states cannot be arbitrated or subject to a pre-dispute arbitration agreement; and (v) actions to enforce this Agreement, compel arbitration, or enforce or vacate an arbitrator's award under this Agreement. Nothing herein shall prevent me from filing charges with, pursuing relief from, or cooperating in proceedings before the Equal Employment Opportunity Commission or any similar federal, state or local agency.</p>
+
+            <p><strong>C.</strong> The arbitrator selected shall be a retired Judge or otherwise qualified individual from a panel proposed by AAA to whom the parties mutually agree, and shall be subject to disqualification on the same grounds as would apply to a judge of such court. The arbitrator shall have the authority to consider and rule on dispositive motions. The arbitrator may issue subpoenas to compel the attendance of witnesses at the arbitration hearing and to compel the production of documents during discovery. Resolution of the dispute shall be based solely upon the law governing the claims and defenses pleaded, and the arbitrator may not invoke any basis other than such controlling law. The arbitrator may award any remedy to which a party is entitled under applicable law for an individual claim.</p>
+
+            <p><strong>D. Class and Collective Action Waivers.</strong> Company and I agree to bring any claim on an individual basis and not as a class or collective action.</p>
+
+            <p>(i) There will be no right or authority for any dispute to be brought, heard or arbitrated as a class action and the arbitrator will have no authority to hear or preside over any such claim ("Class Action Waiver").</p>
+
+            <p>(ii) There will be no right or authority for any dispute to be brought, heard or arbitrated as a collective action and the arbitrator will have no authority to hear or preside over any such claim ("Collective Action Waiver").</p>
+
+            <p><strong>Entire Agreement.</strong> This is the entire agreement between Company and me regarding dispute resolution, and this Agreement supersedes any and all prior agreements regarding these issues. No supervisor or representative of Company, other than the President of Company, has any authority to enter into any agreement contrary to the foregoing. <strong>Oral representations made before or after I am hired do not alter this Agreement.</strong></p>
+
+            <p><strong>3. Severance and Enforceability.</strong> If any term, provision, or portion of this Agreement is declared void or unenforceable, it shall be severed, and the remainder of this Agreement shall be enforceable. <strong>However, this Agreement prohibits the arbitrator from consolidating the claims of others into one proceeding, to the maximum extent permitted by law. This means an arbitrator shall hear only individual claims and is prohibited from fashioning a proceeding as a class, collective, representative, or group action or awarding relief to a group of claimants or employees in one proceeding, to the maximum extent permitted by law.</strong></p>
+
+            <p><strong>Please read this Arbitration Agreement carefully. I may also want to consult my own private legal counsel. This is an important document that affects my legal rights.</strong></p>
+
+            <p>By signing below, I agree to be bound to this Arbitration Agreement, as does the Company. I understand that, as more fully set forth above, I and Company must arbitrate any and all covered disputes and legal claims and I and Company are waiving the right to a jury trial or to sue in court.</p>
+
+            <p class="arb-final"><strong>THE PARTIES HAVE READ AND UNDERSTAND THIS AGREEMENT.</strong></p>
+          </div>
         </div>
 
         <div class="divider"></div>
@@ -1184,9 +1209,7 @@ function applyTranslations() {
   // Set handbook iframe src based on language
   const iframe = document.getElementById('handbook-iframe');
   if (iframe) iframe.src = t.handbookUrl;
-  // Set arbitration iframe src
-  const arbIframe = document.getElementById('arb-iframe');
-  if (arbIframe && t.arbEmbedUrl) arbIframe.src = t.arbEmbedUrl;
+
   // Set NEST date
   const nestDate = document.getElementById('nest-date');
   if (nestDate) nestDate.textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
